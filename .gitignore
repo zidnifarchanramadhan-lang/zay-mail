@@ -1,17 +1,12 @@
-# Private Cloudflare Backend & Database Configurations
-src/
-functions/
-schema.sql
-wrangler.toml
-.wrangler/
-package.json
-package-lock.json
+# Dependencies
 node_modules/
 
-# Private Webmail Application (Contains Owner Dashboard & Authentication)
-public/
+# Cloudflare Local State
+.wrangler/
 
-# Environment Variables & Secrets
+# Local Configurations & Secrets (Private IDs, keys, and tokens)
+*.local.toml
+*.local
 .env*
 *.pem
 *.key

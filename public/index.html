@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZayMail</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFE600'><rect width='24' height='24' rx='4' fill='black'/><path d='M3 8l9 6 9-6M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z' stroke='%23FFE600' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  
+  <!-- Google Fonts: Space Grotesk & Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Space Grotesk"', 'sans-serif'],
+            mono: ['"Space Mono"', 'monospace'],
+          },
+          colors: {
+            neo: {
+              bg: '#FFFDF0',
+              yellow: '#FFE600',
+              lime: '#A3E635',
+              green: '#86EFAC',
+              purple: '#C4B5FD',
+              pink: '#F472B6',
+              rose: '#FDA4AF',
+              cyan: '#38BDF8',
+              orange: '#FB923C',
+              dark: '#121212',
+            }
+          },
+          boxShadow: {
+            'brutal-sm': '2px 2px 0px 0px #000000',
+            'brutal': '4px 4px 0px 0px #000000',
+            'brutal-lg': '6px 6px 0px 0px #000000',
+            'brutal-xl': '8px 8px 0px 0px #000000',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FFFDF0;
+      background-image: radial-gradient(#121212 0.75px, transparent 0.75px);
+      background-size: 24px 24px;
+    }
+    /* Custom Neo-Brutalist scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFFDF0;
+      border-left: 2px solid #000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FFE600;
+      border: 2px solid #000;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #000;
+    }
+    .btn-brutal {
+      transition: all 0.12s ease-in-out;
+    }
+    .btn-brutal:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px #000000 !important;
+    }
+    .btn-brutal:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px 0px #000000 !important;
+    }
+    /* Prevent Chrome/Edge autofill blue tint */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+      -webkit-text-fill-color: #000 !important;
+    }
+  </style>
+</head>
+<body class="bg-neo-bg text-neo-dark min-h-screen flex flex-col font-sans selection:bg-neo-yellow selection:text-black antialiased overflow-x-hidden">
+
+  <!-- ================= PUBLIC VIEW: ZAYMAIL API SUBSCRIPTION & SAAS LANDING PAGE (NEO-BRUTALISM) ================= -->
+  <div id="publicProfileView" class="min-h-screen flex flex-col justify-between">
+    
+    <!-- Owner Preview Banner (Hanya muncul jika pemilik sedang pratinjau landing page publik) -->
+    <div id="ownerPreviewBanner" class="hidden bg-neo-yellow border-b-[3px] border-black px-3 sm:px-6 py-2.5 z-40 sticky top-0 shadow-brutal-sm">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div class="flex items-center space-x-2 text-xs font-mono font-bold text-black text-center sm:text-left">
+          <span class="px-2 py-0.5 bg-black text-neo-yellow font-black uppercase text-[10px]">MODE PRATINJAU PEMILIK</span>
+          <span>Perangkat Anda terotorisasi. Pengunjung umum hanya melihat dokumentasi &amp; akses API ZayMail ini tanpa banner ini.</span>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button id="btnBannerReturnMail" class="btn-brutal px-3 py-1 bg-neo-lime border-2 border-black text-xs font-black uppercase shadow-brutal-sm flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span>Kembali ke Inbox ZayMail</span>
+          </button>
+          <button id="btnBannerRevoke" class="btn-brutal px-2.5 py-1 bg-neo-rose border-2 border-black text-xs font-bold uppercase shadow-brutal-sm" title="Kunci / Cabut Otorisasi Perangkat Ini">
+            Kunci
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Public Top Header (Full Desktop Width on Windows) -->
+    <header class="border-b-[3px] border-black bg-white sticky top-0 z-30 shadow-brutal-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        
+        <!-- Brand Logo -->
+        <div id="publicBrandLogo" class="flex items-center space-x-3 cursor-pointer select-none">
+          <div class="w-10 h-10 bg-neo-yellow border-[2.5px] border-black shadow-brutal-sm flex items-center justify-center -rotate-2 font-mono font-black text-black text-base shrink-0">
+            Z
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-lg sm:text-xl tracking-tight uppercase text-black">ZAYMAIL API</span>
+              <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-black uppercase bg-neo-lime border border-black shadow-brutal-sm">SERVERLESS</span>
+            </div>
+            <p class="text-[11px] font-mono font-bold text-slate-700 hidden sm:block">Layanan REST API Email Sementara &bull; Domain: zaysee.my.id</p>
+          </div>
+        </div>
+
+        <!-- Navigation Links (Desktop) -->
+        <nav class="hidden md:flex items-center space-x-6 text-xs font-black uppercase tracking-wider">
+          <button type="button" onclick="scrollToSection('fitur')" class="hover:text-amber-600 transition-colors uppercase font-black text-xs cursor-pointer">Keunggulan API</button>
+          <button type="button" onclick="scrollToSection('harga')" class="hover:text-amber-600 transition-colors uppercase font-black text-xs cursor-pointer">Paket &amp; Harga</button>
+          <button type="button" onclick="scrollToSection('dokumentasi')" class="hover:text-amber-600 transition-colors uppercase font-black text-xs cursor-pointer">Dokumentasi</button>
+          <button type="button" onclick="scrollToSection('simulator')" class="hover:text-amber-600 transition-colors uppercase font-black text-xs cursor-pointer">Uji Coba API</button>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="flex items-center space-x-2.5">
+          <!-- Direct Order CTA -->
+          <button type="button" onclick="scrollToSection('harga')" class="btn-brutal px-3 sm:px-4 py-1.5 bg-neo-lime border-2 border-black font-black text-xs uppercase shadow-brutal text-black shrink-0 flex items-center gap-1 cursor-pointer">
+            <span>Dapatkan Akses</span>
+            <span class="hidden sm:inline">&rarr;</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container (Full Width Max-7XL on Windows Desktop) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex flex-col gap-8 sm:gap-12">
+      
+      <!-- HERO SECTION (2-Column Grid on Windows Desktop) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        
+        <!-- Left: Sales Pitch & Yapping about API Subscription (Cols 7 on Desktop) -->
+        <div class="lg:col-span-7 bg-white border-[3px] border-black p-6 sm:p-8 shadow-brutal-lg flex flex-col justify-between relative overflow-hidden">
+          
+          <div>
+            <!-- Window Tag Bar -->
+            <div class="flex items-center justify-between border-b-2 border-black pb-3 mb-5">
+              <div class="flex items-center space-x-1.5">
+                <div class="w-3 h-3 rounded-full bg-rose-400 border-2 border-black"></div>
+                <div class="w-3 h-3 rounded-full bg-neo-yellow border-2 border-black"></div>
+                <div class="w-3 h-3 rounded-full bg-neo-green border-2 border-black"></div>
+                <span class="text-[11px] font-mono font-bold uppercase ml-2 text-black">ZAYMAIL_API_OFFICIAL_PITCH.DOC</span>
+              </div>
+              <span class="text-[11px] font-mono font-black bg-neo-lime px-2 py-0.5 border border-black shadow-brutal-sm">API v2.4 ACTIVE</span>
+            </div>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap gap-2 mb-3">
+              <span class="px-2.5 py-1 bg-neo-yellow border-2 border-black text-xs font-black uppercase shadow-brutal-sm">REST API TEMPORARY EMAIL</span>
+              <span class="px-2.5 py-1 bg-neo-cyan border-2 border-black text-xs font-black uppercase shadow-brutal-sm">D1 SQLITE + WORKERS</span>
+              <span class="px-2.5 py-1 bg-neo-pink/30 border-2 border-black text-xs font-mono font-bold shadow-brutal-sm">CLEAN REPUTATION</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-black uppercase text-black tracking-tight leading-tight sm:leading-none my-3">
+              Infrastruktur API Email Sementara Paling Stabil &amp; Cepat untuk Proyek Anda.
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium mt-3">
+              Bosan bot Anda gagal registrasi atau akun testing di-suspend karena domain temp-mail publik sudah masuk <em>blacklist</em>? 
+              <strong>ZayMail API</strong> menyediakan akses API email sementara kelas industri di atas domain bersih kustom <span class="bg-neo-yellow px-1 border border-black font-bold">@zaysee.my.id</span>, didukung Cloudflare edge serverless dengan latensi respon di bawah 50ms!
+            </p>
+
+            <!-- Feature Bullet Highlights (The Yapping) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-5 text-xs font-mono">
+              <div class="flex items-start gap-2 bg-neo-bg border border-black p-2 shadow-brutal-sm">
+                <svg class="w-3.5 h-3.5 text-black shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Bukan Domain Sampah:</strong> Bersih dari blacklist Google, Discord, OpenAI, Steam.</span>
+              </div>
+              <div class="flex items-start gap-2 bg-neo-bg border border-black p-2 shadow-brutal-sm">
+                <svg class="w-3.5 h-3.5 text-black shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Isolasi Token Keamanan:</strong> Tiap inbox dilindungi token kriptografis unik.</span>
+              </div>
+              <div class="flex items-start gap-2 bg-neo-bg border border-black p-2 shadow-brutal-sm">
+                <svg class="w-3.5 h-3.5 text-black shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Auto-Extract OTP:</strong> Payload JSON rapi, HTML dibersihkan, siap di-regex.</span>
+              </div>
+              <div class="flex items-start gap-2 bg-neo-bg border border-black p-2 shadow-brutal-sm">
+                <svg class="w-3.5 h-3.5 text-black shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span><strong>Zero Setup DNS:</strong> Langsung nembak endpoint HTTP dari bahasa apa pun.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="pt-5 border-t-2 border-black flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-2.5">
+              <button type="button" onclick="scrollToSection('harga')" class="btn-brutal px-5 py-3 bg-neo-lime border-2 border-black text-black font-black uppercase text-xs sm:text-sm shadow-brutal flex items-center gap-2 cursor-pointer">
+                <span>Lihat Pilihan Paket</span>
+                <span>&darr;</span>
+              </button>
+              <a href="https://wa.me/62895379164169?text=Halo%20Zay!%20Saya%20ingin%20akses%20API%20ZayMail%20untuk%20proyek%20saya." target="_blank" rel="noopener noreferrer" class="btn-brutal px-4 py-3 bg-neo-yellow border-2 border-black text-black font-black uppercase text-xs sm:text-sm shadow-brutal flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+                </svg>
+                <span>Aktivasi via WhatsApp</span>
+              </a>
+            </div>
+            <span class="text-xs font-mono font-bold text-slate-700 text-center sm:text-right">
+              Mulai dari <strong>Rp 29rb/bln</strong>
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Right: Real Code Integration Preview (Cols 5 on Desktop) -->
+        <div id="dokumentasi" class="lg:col-span-5 bg-neo-dark border-[3px] border-black p-5 sm:p-6 shadow-brutal-lg flex flex-col justify-between text-white font-mono scroll-mt-20">
+          
+          <div>
+            <!-- Code Window Title -->
+            <div class="flex items-center justify-between border-b-2 border-neutral-700 pb-2.5 mb-3 text-xs">
+              <div class="flex items-center space-x-1.5">
+                <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                <span class="text-neutral-400 font-bold ml-1.5">INTEGRATION_EXAMPLE</span>
+              </div>
+              <span class="text-[10px] bg-neutral-800 text-neo-yellow px-2 py-0.5 border border-neutral-700 font-bold">REST 200 OK</span>
+            </div>
+
+            <!-- Code Language Tabs -->
+            <div class="flex items-center space-x-1.5 mb-3 text-xs border-b border-neutral-800 pb-2">
+              <button onclick="switchCodeTab('python')" id="btnTabPython" class="px-2.5 py-1 bg-neo-yellow text-black font-black uppercase text-[11px] border border-black">Python</button>
+              <button onclick="switchCodeTab('node')" id="btnTabNode" class="px-2.5 py-1 bg-neutral-800 text-neutral-300 font-bold uppercase text-[11px] hover:bg-neutral-700">Node.js</button>
+              <button onclick="switchCodeTab('curl')" id="btnTabCurl" class="px-2.5 py-1 bg-neutral-800 text-neutral-300 font-bold uppercase text-[11px] hover:bg-neutral-700">cURL</button>
+            </div>
+
+            <!-- Code Displays -->
+            <!-- Python Block -->
+            <div id="codeBlockPython" class="text-xs leading-relaxed space-y-1 overflow-x-auto text-neutral-300 bg-black/60 p-3 border border-neutral-800">
+              <span class="text-neutral-500"># 1. Generate email baru via ZayMail API</span><br>
+              <span class="text-rose-400">import</span> requests<br><br>
+              res = requests.post(<span class="text-emerald-300">"https://zaysee.my.id/api/new-address"</span>).json()<br>
+              address = res[<span class="text-amber-300">"address"</span>]  <span class="text-neutral-500"># ex: budi.santoso@zaysee.my.id</span><br>
+              token = res[<span class="text-amber-300">"token"</span>]      <span class="text-neutral-500"># Token isolasi keamanan</span><br><br>
+              <span class="text-neutral-500"># 2. Cek pesan masuk (Polling OTP)</span><br>
+              headers = {<span class="text-amber-300">"X-Mailbox-Token"</span>: token}<br>
+              inbox = requests.get(<span class="text-emerald-300">f"https://zaysee.my.id/api/messages?address={address}"</span>, headers=headers).json()<br>
+              <span class="text-rose-400">print</span>(<span class="text-amber-300">"OTP / Pesan masuk:"</span>, inbox[<span class="text-amber-300">"messages"</span>])
+            </div>
+
+            <!-- Node Block -->
+            <div id="codeBlockNode" class="hidden text-xs leading-relaxed space-y-1 overflow-x-auto text-neutral-300 bg-black/60 p-3 border border-neutral-800">
+              <span class="text-neutral-500">// 1. Generate temp email via ZayMail API</span><br>
+              <span class="text-rose-400">const</span> axios = require(<span class="text-emerald-300">'axios'</span>);<br><br>
+              <span class="text-rose-400">const</span> { data } = <span class="text-rose-400">await</span> axios.post(<span class="text-emerald-300">'https://zaysee.my.id/api/new-address'</span>);<br>
+              <span class="text-rose-400">const</span> { address, token } = data;<br><br>
+              <span class="text-neutral-500">// 2. Ambil daftar pesan &amp; kode verifikasi</span><br>
+              <span class="text-rose-400">const</span> inbox = <span class="text-rose-400">await</span> axios.get(<span class="text-emerald-300">`https://zaysee.my.id/api/messages?address=${address}`</span>, {<br>
+              &nbsp;&nbsp;headers: { <span class="text-amber-300">'X-Mailbox-Token'</span>: token }<br>
+              });<br>
+              console.log(inbox.data.messages);
+            </div>
+
+            <!-- cURL Block -->
+            <div id="codeBlockCurl" class="hidden text-xs leading-relaxed space-y-1 overflow-x-auto text-neutral-300 bg-black/60 p-3 border border-neutral-800">
+              <span class="text-neutral-500"># 1. Generate Alamat Baru</span><br>
+              curl -X POST https://zaysee.my.id/api/new-address<br><br>
+              <span class="text-neutral-500"># 2. Ambil Pesan Masuk dengan Token</span><br>
+              curl -X GET "https://zaysee.my.id/api/messages?address=budi.santoso@zaysee.my.id" \<br>
+              &nbsp;&nbsp;-H "X-Mailbox-Token: YOUR_TOKEN"
+            </div>
+          </div>
+
+          <!-- Bottom Live Server Status -->
+          <div class="mt-4 pt-3 border-t border-neutral-800 flex items-center justify-between text-[11px] text-neutral-400">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span class="text-emerald-400 font-bold">API Gateway Status: 100% Operational</span>
+            </span>
+            <span class="bg-neutral-800 px-2 py-0.5 border border-neutral-700">Sub-50ms Edge</span>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SECTION 2: WHY SUBSCRIBE / KENAPA HARUS LANGGANAN API INI? -->
+      <section id="fitur" class="bg-white border-[3px] border-black p-6 sm:p-8 shadow-brutal-lg scroll-mt-20">
+        
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b-2 border-black pb-4 mb-6 gap-2">
+          <div>
+            <span class="text-xs font-mono font-bold bg-neo-pink px-2 py-0.5 border border-black shadow-brutal-sm uppercase">WHY ZAYMAIL API</span>
+            <h2 class="text-2xl sm:text-3xl font-black uppercase text-black tracking-tight mt-1">
+              Keunggulan Dibanding Temp Mail Gratisan Lainnya
+            </h2>
+          </div>
+          <p class="text-xs font-mono text-slate-700 max-w-md">
+            Dibangun khusus untuk developer, QA engineer, tester, dan automation bot yang butuh kehandalan tinggi tanpa drama IP ban.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <!-- Feature 1 -->
+          <div class="bg-neo-bg border-2 border-black p-4 shadow-brutal-sm flex flex-col justify-between">
+            <div>
+              <div class="w-8 h-8 bg-neo-yellow border-2 border-black shadow-brutal-sm flex items-center justify-center font-mono font-black text-xs text-black mb-3">
+                01
+              </div>
+              <h3 class="font-black text-sm uppercase text-black mb-1.5">Domain Bersih @zaysee.my.id</h3>
+              <p class="text-xs font-mono text-slate-700 leading-relaxed">
+                Domain kustom milik pribadi yang tidak disalahgunakan publik. Akun yang Anda daftarkan dijamin lolos verifikasi dan tidak langsung di-blacklist oleh sistem bot fraud detection.
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-t border-black/30 text-[10px] font-mono font-bold text-slate-600 uppercase">
+              Status: Clean MX &bull; SPF &bull; DKIM
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="bg-neo-bg border-2 border-black p-4 shadow-brutal-sm flex flex-col justify-between">
+            <div>
+              <div class="w-8 h-8 bg-neo-lime border-2 border-black shadow-brutal-sm flex items-center justify-center font-mono font-black text-xs text-black mb-3">
+                02
+              </div>
+              <h3 class="font-black text-sm uppercase text-black mb-1.5">Isolasi Token X-Mailbox</h3>
+              <p class="text-xs font-mono text-slate-700 leading-relaxed">
+                Setiap alamat baru diproteksi token rahasia. Orang lain atau bot lain di internet tidak bisa menebak atau mengintip isi email Anda tanpa token otentikasi tersebut.
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-t border-black/30 text-[10px] font-mono font-bold text-slate-600 uppercase">
+              Header: X-Mailbox-Token Auth
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="bg-neo-bg border-2 border-black p-4 shadow-brutal-sm flex flex-col justify-between">
+            <div>
+              <div class="w-8 h-8 bg-neo-cyan border-2 border-black shadow-brutal-sm flex items-center justify-center font-mono font-black text-xs text-black mb-3">
+                03
+              </div>
+              <h3 class="font-black text-sm uppercase text-black mb-1.5">Edge Serverless Sub-50ms</h3>
+              <p class="text-xs font-mono text-slate-700 leading-relaxed">
+                Didukung arsitektur Cloudflare Workers global di 300+ data center dunia dan Cloudflare D1 SQLite. Tanpa server lambat, tanpa cold-start, dan uptime di atas 99.9%.
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-t border-black/30 text-[10px] font-mono font-bold text-slate-600 uppercase">
+              Infra: Cloudflare Workers + D1
+            </div>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="bg-neo-bg border-2 border-black p-4 shadow-brutal-sm flex flex-col justify-between">
+            <div>
+              <div class="w-8 h-8 bg-neo-purple border-2 border-black shadow-brutal-sm flex items-center justify-center font-mono font-black text-xs text-black mb-3">
+                04
+              </div>
+              <h3 class="font-black text-sm uppercase text-black mb-1.5">Siap Parsing Bot &amp; Regex</h3>
+              <p class="text-xs font-mono text-slate-700 leading-relaxed">
+                Response JSON terstruktur rapi: subject, plaintext, sanitized HTML, dan sender. Bot Anda cukup jalankan regex <code>\b\d{6}\b</code> untuk menangkap kode OTP dalam 1 detik!
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-t border-black/30 text-[10px] font-mono font-bold text-slate-600 uppercase">
+              Format: Structured JSON &bull; Auto OTP
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SECTION 3: PAKET & HARGA AKSES API (PRICING TABLE / THE CORE YAPPING) -->
+      <section id="harga" class="bg-white border-[3px] border-black p-6 sm:p-8 shadow-brutal-lg scroll-mt-20">
+        
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <span class="text-xs font-mono font-bold bg-neo-yellow px-2 py-0.5 border border-black shadow-brutal-sm uppercase">PILIHAN PAKET AKSES API</span>
+          <h2 class="text-3xl sm:text-4xl font-black uppercase text-black tracking-tight mt-2">
+            Paket Akses API Sesuai Skala Proyek Anda
+          </h2>
+          <p class="text-xs sm:text-sm font-mono text-slate-700 mt-2">
+            Pilih paket bulanan di bawah ini. Tanpa kontrak rumit, aktivasi instan langsung via WhatsApp / Telegram admin.
+          </p>
+        </div>
+
+        <!-- 3 Pricing Cards Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          
+          <!-- PLAN 1: STARTER DEVELOPER -->
+          <div class="bg-neo-bg border-[3px] border-black p-6 shadow-brutal flex flex-col justify-between relative">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black uppercase tracking-wider bg-white px-2 py-0.5 border border-black">STARTER DEV</span>
+                <span class="text-[10px] font-mono font-bold text-slate-600">Uji Coba &amp; Bot Kecil</span>
+              </div>
+
+              <div class="mb-4">
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl sm:text-4xl font-black text-black">Rp 29.000</span>
+                  <span class="text-xs font-mono font-bold text-slate-600">/ bulan</span>
+                </div>
+                <p class="text-xs font-mono text-slate-600 mt-1">Sangat hemat untuk developer pemula atau testing script pribadi.</p>
+              </div>
+
+              <!-- Feature List -->
+              <div class="border-t-2 border-black pt-4 mb-6 space-y-2.5 text-xs font-mono">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span><strong>1.000 Request API</strong> / hari</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>1 Dedicated API Key</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Endpoint <code>/api/new-address</code></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Endpoint <code>/api/messages</code></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Rate limit: 30 req / menit</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-500">
+                  <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                  <span class="line-through">Custom Alias Alamat Permanen</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="https://wa.me/62895379164169?text=Halo%20Zay!%20Saya%20ingin%20akses%20API%20ZayMail%20Paket%20Starter%20Dev%20(Rp%2029.000/bln)." target="_blank" rel="noopener noreferrer" class="btn-brutal block w-full py-3 bg-white hover:bg-slate-100 border-2 border-black text-black font-black uppercase text-xs tracking-wider text-center shadow-brutal-sm">
+              Pilih Paket Starter
+            </a>
+          </div>
+
+          <!-- PLAN 2: PRO AUTOMATION (HIGHLIGHTED / BEST VALUE) -->
+          <div class="bg-yellow-50 border-[3.5px] border-black p-6 shadow-brutal-xl flex flex-col justify-between relative transform lg:-translate-y-2">
+            
+            <!-- Ribbon Badge -->
+            <div class="absolute -top-3.5 right-6 bg-neo-pink border-2 border-black px-3 py-0.5 text-[10px] font-black uppercase shadow-brutal-sm">
+              PALING POPULER
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black uppercase tracking-wider bg-neo-yellow px-2 py-0.5 border border-black shadow-brutal-sm">PRO AUTOMATION</span>
+                <span class="text-[10px] font-mono font-bold text-slate-800">Best for QA &amp; Bots</span>
+              </div>
+
+              <div class="mb-4">
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl sm:text-4xl font-black text-black">Rp 79.000</span>
+                  <span class="text-xs font-mono font-bold text-slate-600">/ bulan</span>
+                </div>
+                <p class="text-xs font-mono text-slate-700 mt-1">Kapasitas lega untuk automasi bot, QA testing harian, dan verifikasi multi-akun.</p>
+              </div>
+
+              <!-- Feature List -->
+              <div class="border-t-2 border-black pt-4 mb-6 space-y-2.5 text-xs font-mono">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span><strong>15.000 Request API</strong> / hari</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span><strong>Custom Alias Prefix:</strong> Buat alamat kustom sendiri permanen!</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>High-Speed Rate Limit (120 req / menit)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Retensi Email Lebih Panjang di D1</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Bantuan Integrasi Script (Python/Node/cURL)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Dukungan Prioritas WhatsApp 24/7</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="https://wa.me/62895379164169?text=Halo%20Zay!%20Saya%20ingin%20akses%20API%20ZayMail%20Paket%20Pro%20Automation%20(Rp%2079.000/bln)." target="_blank" rel="noopener noreferrer" class="btn-brutal block w-full py-3.5 bg-neo-lime hover:bg-emerald-300 border-2 border-black text-black font-black uppercase text-xs tracking-wider text-center shadow-brutal">
+              Pilih Paket Pro Sekarang &rarr;
+            </a>
+          </div>
+
+          <!-- PLAN 3: ENTERPRISE & BULK SCRAPING -->
+          <div class="bg-neo-bg border-[3px] border-black p-6 shadow-brutal flex flex-col justify-between relative">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black uppercase tracking-wider bg-white px-2 py-0.5 border border-black">ENTERPRISE</span>
+                <span class="text-[10px] font-mono font-bold text-slate-600">Skala Besar / Agensi</span>
+              </div>
+
+              <div class="mb-4">
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl sm:text-4xl font-black text-black">Rp 199.000</span>
+                  <span class="text-xs font-mono font-bold text-slate-600">/ bulan</span>
+                </div>
+                <p class="text-xs font-mono text-slate-600 mt-1">Tanpa batas kuota, cocok untuk operasi scraping masif dan bisnis SaaS.</p>
+              </div>
+
+              <!-- Feature List -->
+              <div class="border-t-2 border-black pt-4 mb-6 space-y-2.5 text-xs font-mono">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span><strong>UNLIMITED Request API</strong> (Tanpa Batas Kuota)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Dedicated Worker Proxy &amp; Multi-threading</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Opsi Custom Domain Tambahan Sendiri</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Webhook Direct Push ke Server Anda</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Garansi SLA 99.9% Uptime Cloudflare</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>Direct Private Chat dengan Developer</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="https://wa.me/62895379164169?text=Halo%20Zay!%20Saya%20tertarik%20dengan%20Paket%20Enterprise%20ZayMail%20API%20(Unlimited%20Request)." target="_blank" rel="noopener noreferrer" class="btn-brutal block w-full py-3 bg-neo-cyan hover:bg-cyan-300 border-2 border-black text-black font-black uppercase text-xs tracking-wider text-center shadow-brutal-sm">
+              Hubungi Custom Enterprise
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Payment Methods & Guarantee Bar -->
+        <div class="mt-8 pt-5 border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-black uppercase">Metode Pembayaran Fleksibel:</span>
+            <span class="bg-white px-2 py-0.5 border border-black shadow-brutal-sm">QRIS Semua Bank</span>
+            <span class="bg-white px-2 py-0.5 border border-black shadow-brutal-sm">GoPay</span>
+            <span class="bg-white px-2 py-0.5 border border-black shadow-brutal-sm">OVO</span>
+            <span class="bg-white px-2 py-0.5 border border-black shadow-brutal-sm">Dana</span>
+            <span class="bg-white px-2 py-0.5 border border-black shadow-brutal-sm">BCA / Mandiri / BRI</span>
+          </div>
+          <div class="text-slate-700 font-bold">
+            Aktivasi API Token dalam <strong>5 - 15 Menit</strong>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SECTION 4: ALUR AKTIVASI & SIMULATOR TEST API -->
+      <section id="simulator" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-20">
+        
+        <!-- How to subscribe (Cols 5) -->
+        <div class="lg:col-span-5 bg-white border-[3px] border-black p-6 shadow-brutal-lg flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b-2 border-black pb-2.5 mb-4">
+              <h3 class="font-black text-sm uppercase text-black flex items-center gap-2">
+                <span>ALUR AKTIVASI API</span>
+              </h3>
+              <span class="text-[10px] font-mono font-bold bg-neo-lime px-2 py-0.5 border border-black shadow-brutal-sm">3 LANGKAH</span>
+            </div>
+
+            <p class="text-xs font-mono text-slate-700 mb-4">Proses cepat tanpa verifikasi KYC yang rumit:</p>
+
+            <div class="space-y-3.5 text-xs font-mono">
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-neo-yellow border-2 border-black font-black text-xs flex items-center justify-center shrink-0 shadow-brutal-sm">1</div>
+                <div>
+                  <div class="font-black text-black uppercase">Pilih Paket Kuota API</div>
+                  <div class="text-slate-700 text-[11px] mt-0.5">Tentukan paket yang sesuai dengan jumlah bot atau pengujian akun proyek Anda.</div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-neo-cyan border-2 border-black font-black text-xs flex items-center justify-center shrink-0 shadow-brutal-sm">2</div>
+                <div>
+                  <div class="font-black text-black uppercase">Konfirmasi via WhatsApp / Telegram</div>
+                  <div class="text-slate-700 text-[11px] mt-0.5">Kirim pesan ke admin untuk mendapatkan nomor rekening / QRIS pembayaran.</div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-neo-green border-2 border-black font-black text-xs flex items-center justify-center shrink-0 shadow-brutal-sm">3</div>
+                <div>
+                  <div class="font-black text-black uppercase">Terima API Key &amp; Jalankan Bot</div>
+                  <div class="text-slate-700 text-[11px] mt-0.5">API Token langsung dikirimkan dan aktif seketika. Siap dipakai di script Python, Node, atau tool Anda.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t-2 border-black">
+            <a href="https://wa.me/62895379164169?text=Halo%20Zay!%20Saya%20ingin%20tanya%20seputar%20akses%20API%20ZayMail." target="_blank" rel="noopener noreferrer" class="btn-brutal block w-full py-2.5 bg-neo-yellow border-2 border-black text-black font-black uppercase text-xs text-center shadow-brutal-sm">
+              Hubungi Admin via WhatsApp &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- Live Interactive API Simulator (Cols 7) -->
+        <div id="dokumentasi" class="lg:col-span-7 bg-white border-[3px] border-black p-6 shadow-brutal-lg flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b-2 border-black pb-2.5 mb-3">
+              <h3 class="font-black text-sm uppercase text-black flex items-center gap-2">
+                <span>TEST SIMULATOR RESPONSE API</span>
+              </h3>
+              <span class="text-[10px] font-mono font-bold bg-neo-cyan px-2 py-0.5 border border-black shadow-brutal-sm">LIVE SIMULATOR</span>
+            </div>
+
+            <p class="text-xs font-mono text-slate-700 mb-3">
+              Klik tombol di bawah untuk menguji format response JSON asli dari ZayMail API secara langsung:
+            </p>
+
+            <!-- Test action buttons -->
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button onclick="simulateApiCall('new-address')" class="btn-brutal px-3 py-1.5 bg-neo-lime border-2 border-black text-black font-black text-xs uppercase shadow-brutal-sm flex items-center gap-1.5">
+                <span>POST /api/new-address</span>
+              </button>
+              <button onclick="simulateApiCall('messages')" class="btn-brutal px-3 py-1.5 bg-neo-yellow border-2 border-black text-black font-black text-xs uppercase shadow-brutal-sm flex items-center gap-1.5">
+                <span>GET /api/messages</span>
+              </button>
+              <button onclick="simulateApiCall('clear')" class="btn-brutal px-2.5 py-1.5 bg-white border-2 border-black text-black font-bold text-xs uppercase shadow-brutal-sm">
+                Reset
+              </button>
+            </div>
+
+            <!-- Simulator Output Screen -->
+            <pre id="apiSimulatorScreen" class="bg-neo-dark text-emerald-400 p-3.5 border-2 border-black font-mono text-xs overflow-x-auto min-h-[160px] max-h-[220px] shadow-brutal-sm leading-relaxed whitespace-pre-wrap select-all">// Klik tombol di atas untuk menjalankan simulasi request API...</pre>
+          </div>
+
+          <div class="mt-4 pt-3 border-t-2 border-black flex items-center justify-between text-[11px] font-mono text-slate-700">
+            <span>Standar Header: <code>X-Mailbox-Token</code> &bull; <code>Content-Type: application/json</code></span>
+            <span class="font-bold text-black">Ready for Postman &amp; Insomnia</span>
+          </div>
+        </div>
+
+      </section>
+
+
+
+    </main>
+
+
+
+  </div>
+
+  <!-- ================= PRIVATE WEBMAIL VIEW (NEO-BRUTALISM) ================= -->
+  <div id="privateMailView" class="min-h-screen flex flex-col hidden">
+
+  <!-- ================= TOP NAVIGATION (NEO-BRUTALISM) ================= -->
+  <header class="border-b-[3px] border-black bg-white sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 bg-neo-yellow border-[2.5px] sm:border-[3px] border-black shadow-brutal-sm sm:shadow-brutal flex items-center justify-center -rotate-2 shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <span class="font-extrabold text-lg sm:text-xl tracking-tight uppercase text-black">ZAYMAIL</span>
+            <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-black tracking-widest uppercase bg-neo-lime border-2 border-black shadow-brutal-sm">SERVERLESS</span>
+          </div>
+          <p class="text-[11px] sm:text-xs font-mono font-bold text-slate-700 truncate">Domain: <span id="currentDomainLabel" class="text-black bg-neo-pink/30 px-1 border border-black">zaysee.my.id</span></p>
+        </div>
+      </div>
+
+      <!-- Header Right Actions -->
+      <div class="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+        <!-- Switch to Public Profile View -->
+        <button id="btnViewPublicProfile" title="Lihat Tampilan Profil Publik" class="btn-brutal px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-neo-pink border-[2px] sm:border-[2.5px] border-black font-bold text-xs uppercase shadow-brutal-sm sm:shadow-brutal flex items-center gap-1 sm:gap-1.5">
+          <svg class="w-4 h-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span class="hidden sm:inline">Mode Publik</span>
+          <span class="sm:hidden text-[11px]">Publik</span>
+        </button>
+
+        <!-- Switch / Open Mailbox Button -->
+        <button id="btnOpenMailboxModal" class="btn-brutal px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-neo-purple border-[2px] sm:border-[2.5px] border-black font-bold text-xs uppercase shadow-brutal-sm sm:shadow-brutal flex items-center gap-1 sm:gap-1.5">
+          <svg class="w-4 h-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          <span class="hidden sm:inline">Daftar Alamat</span>
+          <span class="sm:hidden text-[11px]">Alamat</span>
+        </button>
+
+        <!-- API Settings Modal Trigger -->
+        <button id="btnSettings" title="Pengaturan API Endpoint" class="btn-brutal p-1.5 sm:p-2 bg-white border-[2px] sm:border-[2.5px] border-black shadow-brutal-sm sm:shadow-brutal">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+
+        <!-- Sound Notification Toggle -->
+        <button id="btnAudioToggle" title="Suara Notifikasi Email Masuk" class="btn-brutal p-1.5 sm:p-2 bg-neo-yellow border-[2px] sm:border-[2.5px] border-black shadow-brutal-sm sm:shadow-brutal">
+          <svg id="iconAudioOn" class="w-4 h-4 sm:w-5 sm:h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg id="iconAudioOff" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= HERO & EMAIL ADDRESS CONTROLS ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 flex flex-col gap-3.5 sm:gap-6">
+
+    <!-- Top Card: Current Address & Actions (Neo-Brutalist Window Style) -->
+    <div class="bg-white border-[2.5px] sm:border-[3px] border-black rounded-none p-3.5 sm:p-6 shadow-brutal sm:shadow-brutal-lg relative">
+      
+      <!-- Top retro window dots -->
+      <div class="flex items-center justify-between border-b-2 border-black pb-2.5 sm:pb-3 mb-3 sm:mb-4">
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <div class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-rose-400 border-2 border-black"></div>
+          <div class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-neo-yellow border-2 border-black"></div>
+          <div class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-neo-green border-2 border-black"></div>
+          <span class="text-[11px] sm:text-xs font-mono font-bold uppercase ml-1 sm:ml-2 text-black tracking-wider">PANEL UTAMA</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="expiryBadge" class="text-[11px] sm:text-xs font-mono font-bold px-2 sm:px-2.5 py-0.5 bg-neo-green border-2 border-black shadow-brutal-sm flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-black"></span>
+            <span>Aktif Permanen</span>
+          </span>
+          <button id="btnTogglePermanent" class="hidden text-xs font-bold underline decoration-2">Ubah</button>
+        </div>
+      </div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5">
+        
+        <!-- Email Display & Copy -->
+        <div class="flex-1 min-w-0">
+          <label class="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">Alamat Email Aktif Saat Ini:</label>
+
+          <!-- Email Address Display Box with Click-to-Copy -->
+          <div class="flex items-center gap-2">
+            <div id="emailDisplayContainer" title="Klik untuk menyalin alamat" class="flex-1 group cursor-pointer bg-neo-bg border-[2.5px] border-black shadow-brutal px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between hover:bg-yellow-100 transition-colors min-w-0">
+              <div class="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden min-w-0 mr-2">
+                <svg class="w-5 h-5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span id="currentEmailAddress" class="font-mono text-sm sm:text-xl font-bold tracking-tight text-black truncate select-all">
+                  memuat-alamat...
+                </span>
+              </div>
+              <span class="shrink-0 text-[11px] sm:text-xs font-black uppercase text-black bg-white px-2 sm:px-2.5 py-1 border-2 border-black shadow-brutal-sm group-hover:bg-neo-yellow transition-colors flex items-center gap-1 sm:gap-1.5">
+                <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>SALIN</span>
+              </span>
+            </div>
+
+            <!-- Copy Quick Button (Desktop only, mobile already has internal badge) -->
+            <button id="btnCopyEmail" title="Salin Email" class="hidden sm:block btn-brutal px-5 py-3.5 bg-neo-yellow border-[2.5px] border-black font-extrabold uppercase text-sm tracking-wider text-black shadow-brutal shrink-0">
+              Salin
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons (Neo-Brutalist 2x2 Grid on Mobile, Flex on Desktop) -->
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 pt-1 sm:pt-2 lg:pt-5">
+          <!-- Generate New Email (Indonesian Names) -->
+          <button id="btnNewEmail" class="btn-brutal w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 bg-neo-green border-[2.5px] border-black text-black font-bold text-xs uppercase tracking-wider shadow-brutal flex items-center justify-center gap-1.5 sm:gap-2">
+            <svg class="w-4 h-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Acak Baru</span>
+          </button>
+
+          <!-- Custom / Permanent Alias Button -->
+          <button id="btnCustomAlias" class="btn-brutal w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 bg-neo-cyan border-[2.5px] border-black text-black font-bold text-xs uppercase tracking-wider shadow-brutal flex items-center justify-center gap-1.5 sm:gap-2">
+            <svg class="w-4 h-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span>Kustom</span>
+          </button>
+
+          <!-- Refresh Inbox Button -->
+          <button id="btnRefreshInbox" class="btn-brutal w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 bg-white border-[2.5px] border-black text-black font-bold text-xs uppercase tracking-wider shadow-brutal flex items-center justify-center gap-1.5 sm:gap-2">
+            <svg id="iconRefreshSpinner" class="w-4 h-4 text-black transition-transform duration-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span id="refreshLabel">Segarkan</span>
+          </button>
+
+          <!-- Delete / Clear Address Button -->
+          <button id="btnDeleteEmail" title="Hapus Alamat dan Riwayat Pesan Ini" class="btn-brutal w-full sm:w-auto px-3 sm:p-3 py-2.5 sm:py-3 bg-neo-rose border-[2.5px] border-black text-black shadow-brutal flex items-center justify-center gap-1.5 sm:gap-0">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span class="sm:hidden font-bold text-xs uppercase tracking-wider">Hapus</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Auto-refresh Progress bar (Neo-Brutalist Bordered Bar) -->
+      <div class="mt-4 sm:mt-5 pt-3 border-t-2 border-black flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono font-bold text-black">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 bg-neo-lime border-2 border-black"></span>
+          <span class="text-[11px] sm:text-xs">LIVE INBOX POLLING: <span id="autoRefreshCountdown" class="bg-black text-neo-yellow px-1.5 py-0.5">8s</span></span>
+        </div>
+        <div class="w-full sm:w-48 bg-white border-2 border-black h-3 sm:h-3.5 shadow-brutal-sm overflow-hidden p-[1px]">
+          <div id="pollingProgressBar" class="bg-neo-yellow h-full border-r-2 border-black transition-all duration-1000 ease-linear" style="width: 100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MAIN INBOX & VIEWER SECTION ================= -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 min-h-[480px] sm:min-h-[520px]">
+
+      <!-- Left Column: Inbox List (Col 5) -->
+      <div id="inboxListColumn" class="lg:col-span-5 bg-white border-[2.5px] sm:border-[3px] border-black flex flex-col shadow-brutal sm:shadow-brutal-lg min-h-[400px]">
+        
+        <!-- List Header -->
+        <div class="p-3 sm:p-3.5 border-b-[2.5px] border-black bg-neo-yellow flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4a2 2 0 00-2 2v1a2 2 0 01-2 2h-4a2 2 0 01-2-2v-1a2 2 0 00-2-2H4" />
+            </svg>
+            <h2 class="font-extrabold text-black text-xs sm:text-sm uppercase tracking-wider">Kotak Masuk</h2>
+            <span id="unreadBadge" class="hidden px-2 py-0.2 text-[10px] font-black bg-black text-neo-yellow border border-black shadow-brutal-sm">0</span>
+          </div>
+          <span id="inboxCountText" class="text-xs font-mono font-bold text-black bg-white px-2 py-0.5 border-2 border-black shadow-brutal-sm">0 pesan</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="p-2.5 sm:p-3 border-b-2 border-black bg-neo-bg">
+          <form role="search" onsubmit="return false;" autocomplete="off" class="relative flex items-center">
+            <svg class="w-4 h-4 text-black absolute left-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input id="searchInput" type="search" name="search_mail_filter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Cari pengirim atau subjek..." class="w-full bg-white border-2 border-black pl-8 pr-3 py-1.5 text-xs font-mono font-bold placeholder-slate-500 shadow-brutal-sm focus:outline-none focus:bg-yellow-50">
+          </form>
+        </div>
+
+        <!-- Messages Container (Scrollable) -->
+        <div id="messagesListContainer" class="flex-1 overflow-y-auto divide-y-2 divide-black min-h-[300px] sm:min-h-[350px] bg-white">
+          <!-- Dynamic email items will be injected here -->
+          
+          <!-- Empty State (Default) -->
+          <div id="emptyInboxState" class="h-full flex flex-col items-center justify-center p-6 sm:p-8 text-center">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-neo-yellow border-[2.5px] border-black shadow-brutal flex items-center justify-center mb-3 sm:mb-4 -rotate-3 text-black">
+              <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+              </svg>
+            </div>
+            <h3 class="font-extrabold text-black uppercase text-xs sm:text-sm mb-1">MENUNGGU EMAIL MASUK...</h3>
+            <p class="text-xs font-mono text-slate-700 max-w-xs leading-relaxed border-2 border-black p-2.5 sm:p-3 bg-neo-bg shadow-brutal-sm mt-2">
+              Kirimkan email ke alamat di atas. Kotak masuk akan diperbarui secara otomatis.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Column: Message Detail Viewer (Col 7) -->
+      <div id="messageViewerColumn" class="hidden lg:flex lg:col-span-7 bg-white border-[2.5px] sm:border-[3px] border-black flex-col shadow-brutal sm:shadow-brutal-lg min-h-[420px]">
+        
+        <!-- Viewer Placeholder (When no email selected) -->
+        <div id="viewerPlaceholder" class="h-full flex flex-col items-center justify-center p-6 sm:p-8 text-center bg-neo-bg">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 bg-white border-[2.5px] border-black shadow-brutal flex items-center justify-center mb-3 rotate-2 text-black">
+            <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+            </svg>
+          </div>
+          <p class="text-xs sm:text-sm font-extrabold uppercase text-black">PILIH SALAH SATU EMAIL DI KIRI</p>
+          <p class="text-xs font-mono text-slate-600 mt-1">Detail isi pesan, format HTML & teks akan ditampilkan di sini.</p>
+        </div>
+
+        <!-- Viewer Content (When email selected) -->
+        <div id="viewerActiveContent" class="hidden h-full flex flex-col flex-1">
+          
+          <!-- Viewer Top Actions & Back (Mobile friendly) -->
+          <div class="p-2.5 sm:p-3 border-b-2 border-black bg-neo-bg flex items-center justify-between gap-2">
+            <button id="btnBackToList" class="lg:hidden btn-brutal px-3 py-1.5 bg-neo-yellow border-2 border-black text-xs font-black uppercase shadow-brutal-sm flex items-center gap-1.5 shrink-0">
+              <svg class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Kotak Masuk</span>
+            </button>
+
+            <!-- Mode Switcher: Rendered HTML vs Plain Text -->
+            <div class="flex items-center space-x-1 border-2 border-black p-0.5 sm:p-1 bg-white shadow-brutal-sm">
+              <button id="tabHtml" class="px-2.5 sm:px-3 py-1 font-extrabold text-[11px] sm:text-xs uppercase bg-neo-yellow border border-black shadow-brutal-sm">HTML</button>
+              <button id="tabText" class="px-2.5 sm:px-3 py-1 font-bold text-[11px] sm:text-xs uppercase text-slate-600 hover:text-black">Text</button>
+            </div>
+
+            <!-- Single Email Actions -->
+            <div class="flex items-center space-x-2 shrink-0">
+              <button id="btnDeleteCurrentMsg" title="Hapus Email Ini" class="btn-brutal px-2.5 sm:px-3 py-1.5 bg-neo-rose border-2 border-black text-[11px] sm:text-xs font-black uppercase shadow-brutal-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Hapus</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Email Metadata Header -->
+          <div class="p-3 sm:p-4 border-b-2 border-black bg-white">
+            <h1 id="viewSubject" class="text-sm sm:text-lg font-black text-black mb-2.5 sm:mb-3 break-words border-b-2 border-black pb-2">
+              Subjek Email
+            </h1>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+              <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                <div id="viewSenderAvatar" class="w-8 h-8 sm:w-9 sm:h-9 bg-neo-purple border-2 border-black font-black text-black flex items-center justify-center uppercase shrink-0 text-xs sm:text-sm shadow-brutal-sm">
+                  Z
+                </div>
+                <div class="min-w-0 truncate">
+                  <div class="font-bold text-black text-xs truncate" id="viewSenderName">Pengirim</div>
+                  <div class="text-slate-600 text-[11px] truncate" id="viewSenderEmail">sender@example.com</div>
+                </div>
+              </div>
+              <div class="text-black bg-neo-bg px-2 py-1 border border-black text-[10px] sm:text-[11px] font-bold shrink-0 self-start sm:self-auto" id="viewDate">
+                26 Sep 2026, 08:30
+              </div>
+            </div>
+          </div>
+
+          <!-- Email Body Area -->
+          <div class="flex-1 bg-neo-bg p-2.5 sm:p-4 flex flex-col min-h-[380px] sm:min-h-[420px]">
+            <!-- Sandboxed Iframe untuk Tampilan HTML Aman -->
+            <iframe id="htmlIframe" class="w-full flex-1 bg-white border-2 border-black shadow-brutal-sm min-h-[350px]" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+
+            <!-- Plain Text Container -->
+            <pre id="textContainer" class="hidden w-full flex-1 p-3 sm:p-4 bg-white text-black font-mono text-xs sm:text-sm border-2 border-black shadow-brutal-sm overflow-y-auto whitespace-pre-wrap break-words min-h-[350px]"></pre>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+  </div> <!-- End #privateMailView -->
+
+  <!-- ================= DAFTAR ALAMAT SAYA MODAL (NEO-BRUTALIST) ================= -->
+  <div id="modalSavedAddresses" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border-[3px] border-black max-w-lg w-full p-4 sm:p-6 shadow-brutal-xl flex flex-col max-h-[88vh]">
+      <div class="flex items-center justify-between border-b-2 border-black pb-3 mb-3">
+        <h3 class="text-sm sm:text-base font-black uppercase text-black flex items-center gap-2">
+          <svg class="w-5 h-5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span>DAFTAR ALAMAT SAYA</span>
+        </h3>
+        <button id="btnCloseSavedModal" class="btn-brutal w-7 h-7 bg-neo-rose border-2 border-black font-black flex items-center justify-center text-xs shadow-brutal-sm" title="Tutup">
+          <svg class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-xs font-mono text-slate-700 mb-3 sm:mb-4">
+        Buka kembali alamat lama yang pernah Anda gunakan (misal untuk verifikasi akun, registrasi, atau langganan).
+      </p>
+
+      <!-- Quick Open Input -->
+      <div class="mb-3 sm:mb-4">
+        <label class="block text-xs font-bold uppercase text-black mb-1">Buka Alamat / Prefix Apa Saja:</label>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 flex items-center bg-neo-bg border-2 border-black px-2.5 sm:px-3 py-2 shadow-brutal-sm min-w-0">
+            <input id="inputQuickOpen" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="misal: budi.santoso" class="bg-transparent flex-1 min-w-0 text-xs font-mono font-bold text-black focus:outline-none">
+            <span class="text-xs font-mono font-bold text-slate-700 shrink-0">@zaysee.my.id</span>
+          </div>
+          <button id="btnQuickOpenSubmit" class="btn-brutal px-3.5 sm:px-4 py-2 bg-neo-yellow border-2 border-black text-black text-xs font-black uppercase shadow-brutal shrink-0">
+            Buka
+          </button>
+        </div>
+      </div>
+
+      <!-- Saved List in this browser -->
+      <div class="flex-1 overflow-y-auto border-t-2 border-black pt-3">
+        <div class="text-[11px] font-black uppercase tracking-wider text-black mb-2">Riwayat Alamat di Browser Ini:</div>
+        <div id="savedAddressesList" class="space-y-2">
+          <!-- Item addresses injected here -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= CUSTOM ALIAS MODAL (NEO-BRUTALIST) ================= -->
+  <div id="modalCustomAlias" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border-[3px] border-black max-w-md w-full p-4 sm:p-6 shadow-brutal-xl">
+      <div class="border-b-2 border-black pb-2 mb-3">
+        <h3 class="text-sm sm:text-base font-black uppercase text-black">BUAT ALAMAT KUSTOM</h3>
+      </div>
+      <p class="text-xs font-mono text-slate-700 mb-3 sm:mb-4">Tentukan nama awalan (prefix) yang Anda inginkan pada domain <span class="font-bold text-black bg-neo-yellow px-1 border border-black">@zaysee.my.id</span>.</p>
+      
+      <div class="flex items-center bg-neo-bg border-2 border-black px-3 py-2 mb-3 shadow-brutal-sm min-w-0">
+        <input id="inputCustomAlias" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="misal: namamu" class="bg-transparent flex-1 min-w-0 text-sm font-mono font-bold text-black focus:outline-none">
+        <span class="text-xs font-mono font-bold text-slate-700 shrink-0">@zaysee.my.id</span>
+      </div>
+
+      <!-- Option: Permanent Checkbox -->
+      <label class="flex items-start gap-2.5 p-3 bg-neo-bg border-2 border-black mb-4 cursor-pointer shadow-brutal-sm">
+        <input id="checkCustomPermanent" type="checkbox" checked class="mt-0.5 w-4 h-4 border-2 border-black text-black rounded-none">
+        <div class="text-xs">
+          <div class="font-black uppercase text-black flex items-center gap-1.5 flex-wrap">
+            <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>ALAMAT PERMANEN</span>
+            <span class="text-[10px] bg-neo-lime px-1 border border-black">DEFAULT</span>
+          </div>
+          <p class="text-slate-700 text-[11px] font-mono mt-0.5">Alamat tidak akan pernah kadaluwarsa. Sangat cocok untuk akun tetap atau verifikasi penting.</p>
+        </div>
+      </label>
+
+      <div class="flex items-center justify-end space-x-2">
+        <button id="btnCancelCustomModal" class="btn-brutal px-4 py-2 bg-white border-2 border-black text-black text-xs font-bold uppercase shadow-brutal-sm">Batal</button>
+        <button id="btnSaveCustomModal" class="btn-brutal px-4 py-2 bg-neo-yellow border-2 border-black text-black text-xs font-black uppercase shadow-brutal">Buat Alamat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SETTINGS MODAL (NEO-BRUTALIST) ================= -->
+  <div id="modalSettings" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border-[3px] border-black max-w-md w-full p-4 sm:p-6 shadow-brutal-xl">
+      <div class="border-b-2 border-black pb-2 mb-3 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-black uppercase text-black">KEAMANAN & PRIVASI</h3>
+        <button id="btnCloseSettingsModal" class="btn-brutal w-7 h-7 bg-neo-rose border-2 border-black font-black flex items-center justify-center text-xs shadow-brutal-sm" title="Tutup">
+          <svg class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <p class="text-xs font-mono text-slate-700 mb-3 sm:mb-4">Lindungi privasi kotak masuk email Anda dengan kode PIN.</p>
+
+      <!-- PIN Keamanan Tambahan -->
+      <div class="border-2 border-black p-3 sm:p-3.5 bg-neo-bg shadow-brutal-sm mb-4">
+        <label class="block text-xs font-black uppercase text-black mb-1 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>PIN PENGUNCI LAYAR</span>
+          </span>
+          <span id="pinStatusLabel" class="text-[10px] text-slate-600 font-bold">Belum Aktif</span>
+        </label>
+        <p class="text-[11px] font-mono text-slate-700 mb-2.5 sm:mb-3">Pasang PIN 4-8 digit untuk mengunci web ini dari orang lain saat perangkat dipinjam.</p>
+        <div class="flex items-center gap-2">
+          <input id="inputAppPin" type="text" inputmode="numeric" maxlength="8" style="-webkit-text-security: disc;" autocomplete="off" placeholder="PIN 4-8 digit" class="flex-1 min-w-0 bg-white border-2 border-black px-3 py-2 text-xs font-mono font-bold text-black shadow-brutal-sm focus:outline-none">
+          <button id="btnSetPin" class="btn-brutal px-3 sm:px-3.5 py-2 bg-neo-yellow border-2 border-black text-black text-xs font-bold uppercase shadow-brutal-sm shrink-0">Set PIN</button>
+          <button id="btnRemovePin" class="btn-brutal px-3 sm:px-3.5 py-2 bg-neo-rose border-2 border-black text-black text-xs font-bold uppercase shadow-brutal-sm hidden shrink-0">Hapus</button>
+        </div>
+      </div>
+
+      <!-- Device Authorization Section -->
+      <div class="border-2 border-black p-3 sm:p-3.5 bg-neo-bg shadow-brutal-sm mb-4">
+        <label class="block text-xs font-black uppercase text-black mb-1 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>STATUS PERANGKAT INI</span>
+          </span>
+          <span class="text-[10px] text-black font-black bg-neo-lime px-1.5 border border-black">TEROTORISASI</span>
+        </label>
+        <p class="text-[11px] font-mono text-slate-700 mb-2.5">
+          Perangkat ini diotorisasi untuk membuka inbox ZayMail. Jika Anda meminjamkan HP/laptop ke orang lain, cabut otorisasi agar web ini hanya menampilkan profil tentang saya.
+        </p>
+        <button id="btnRevokeDeviceAuth" class="btn-brutal w-full py-2 bg-neo-rose border-2 border-black text-black text-xs font-black uppercase shadow-brutal-sm">
+          Cabut Otorisasi Perangkat Ini
+        </button>
+      </div>
+
+      <div class="flex items-center justify-end pt-2 border-t-2 border-black">
+        <button id="btnCancelSettingsModal" class="btn-brutal px-4 sm:px-5 py-2 bg-white border-2 border-black text-black text-xs font-black uppercase shadow-brutal">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= OWNER DEVICE UNLOCK MODAL (NEO-BRUTALIST) ================= -->
+  <div id="modalOwnerAuth" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border-[3px] sm:border-[4px] border-black max-w-sm w-full p-5 sm:p-7 shadow-brutal-xl text-center">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 bg-neo-yellow border-[3px] border-black shadow-brutal text-black flex items-center justify-center mx-auto mb-3 -rotate-2">
+        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h3 class="text-base sm:text-lg font-black uppercase text-black mb-1">OTORISASI PERANGKAT</h3>
+      <p class="text-xs font-mono text-slate-700 mb-4">Masukkan PIN Pemilik untuk membuka ZayMail di perangkat ini secara permanen.</p>
+      
+      <input id="inputOwnerPin" type="text" inputmode="numeric" maxlength="8" style="-webkit-text-security: disc;" autocomplete="off" placeholder="••••" class="w-full text-center text-2xl tracking-[0.3em] font-mono font-black bg-neo-bg border-[2.5px] border-black py-2.5 text-black mb-4 shadow-brutal focus:outline-none">
+      
+      <div class="flex items-center space-x-2">
+        <button id="btnCancelOwnerAuth" class="btn-brutal flex-1 py-2.5 bg-white border-2 border-black text-black font-bold uppercase text-xs shadow-brutal-sm">
+          Batal
+        </button>
+        <button id="btnSubmitOwnerAuth" class="btn-brutal flex-1 py-2.5 bg-neo-lime border-2 border-black text-black font-black uppercase text-xs shadow-brutal">
+          Otorisasi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOCK SCREEN OVERLAY (NEO-BRUTALIST) ================= -->
+  <div id="screenLockOverlay" class="fixed inset-0 bg-neo-yellow/90 z-50 hidden flex-col items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border-[3px] sm:border-[4px] border-black max-w-sm w-full p-5 sm:p-8 shadow-brutal-xl text-center">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 bg-neo-yellow border-[3px] border-black shadow-brutal text-black flex items-center justify-center mx-auto mb-3 sm:mb-4 -rotate-3">
+        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h2 class="text-lg sm:text-xl font-black uppercase text-black mb-1">ZAYMAIL TERKUNCI</h2>
+      <p class="text-xs font-mono text-slate-700 mb-4 sm:mb-6">Masukkan PIN keamanan untuk membuka akses inbox.</p>
+      
+      <input id="inputUnlockPin" type="text" inputmode="numeric" maxlength="8" style="-webkit-text-security: disc;" autocomplete="off" placeholder="••••" class="w-full text-center text-2xl sm:text-3xl tracking-[0.4em] font-mono font-black bg-neo-bg border-[2.5px] sm:border-[3px] border-black py-2.5 sm:py-3 text-black mb-4 shadow-brutal focus:outline-none">
+      
+      <button id="btnSubmitUnlock" class="btn-brutal w-full py-3 sm:py-3.5 bg-neo-lime border-[2.5px] sm:border-[3px] border-black text-black font-black uppercase text-xs sm:text-sm tracking-wider shadow-brutal">
+        BUKA KUNCI SEKARANG
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION (NEO-BRUTALIST) ================= -->
+  <div id="toastNotification" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:bottom-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-2 px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-[2.5px] sm:border-[3px] border-black text-black text-xs sm:text-sm font-bold shadow-brutal sm:shadow-brutal-lg max-w-sm mx-auto sm:mx-0 justify-center sm:justify-start">
+    <svg id="toastIcon" class="w-5 h-5 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toastMessage" class="font-mono">Pesan notifikasi</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // ================= OTORISASI PERANGKAT PEMILIK (SECRET COOKIE & STORAGE) =================
+    const AUTH_COOKIE_NAME = 'zay_device_auth';
+    const AUTH_STORAGE_KEY = 'zay_device_auth';
+    const OWNER_DEFAULT_PIN = 'YOUR_SECRET_PIN'; // Masukkan PIN rahasia pemilik di sini (contoh: 1234)
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setDeviceAuthorized(isAuth) {
+      if (isAuth) {
+        document.cookie = `${AUTH_COOKIE_NAME}=authorized; path=/; max-age=31536000; SameSite=Lax`;
+        try { localStorage.setItem(AUTH_STORAGE_KEY, 'authorized'); } catch(e) {}
+      } else {
+        document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+        try { localStorage.removeItem(AUTH_STORAGE_KEY); } catch(e) {}
+      }
+    }
+
+    function isDeviceAuthorized() {
+      // 1. Cek parameter rahasia di URL: ?mail, ?owner, ?auth=zay, ?unlock
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('mail') || urlParams.has('owner') || urlParams.get('auth') === 'zay' || urlParams.has('unlock')) {
+        setDeviceAuthorized(true);
+        // Bersihkan parameter URL di browser agar tampilan URL tetap rapi
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        return true;
+      }
+
+      // 2. Cek Cookie Perangkat
+      if (getCookie(AUTH_COOKIE_NAME) === 'authorized') return true;
+
+      // 3. Cek LocalStorage cadangan
+      try {
+        if (localStorage.getItem(AUTH_STORAGE_KEY) === 'authorized') return true;
+      } catch(e) {}
+
+      return false;
+    }
+
+    let mailAppInitialized = false;
+
+    function switchToMailView() {
+      document.title = "ZayMail";
+      const publicView = document.getElementById('publicProfileView');
+      const mailView = document.getElementById('privateMailView');
+      const previewBanner = document.getElementById('ownerPreviewBanner');
+
+      if (publicView) publicView.classList.add('hidden');
+      if (previewBanner) previewBanner.classList.add('hidden');
+      if (mailView) mailView.classList.remove('hidden');
+
+      initMailApp();
+    }
+
+    function switchToPublicProfileView(isPreview = false) {
+      document.title = "ZayMail";
+      const publicView = document.getElementById('publicProfileView');
+      const mailView = document.getElementById('privateMailView');
+      const previewBanner = document.getElementById('ownerPreviewBanner');
+
+      if (mailView) mailView.classList.add('hidden');
+      if (publicView) publicView.classList.remove('hidden');
+
+      if (isPreview || isDeviceAuthorized()) {
+        if (previewBanner) previewBanner.classList.remove('hidden');
+      } else {
+        if (previewBanner) previewBanner.classList.add('hidden');
+      }
+    }
+
+    function revokeDeviceAuth() {
+      if (!confirm('Apakah Anda yakin ingin mencabut otorisasi perangkat ini? Setelah dicabut, web ini akan kembali menampilkan profil tentang saya.')) return;
+      setDeviceAuthorized(false);
+      showToast('Otorisasi perangkat berhasil dicabut.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+
+    // Konfigurasi Dasar
+    const DEFAULT_DOMAIN = 'zaysee.my.id';
+    const POLL_INTERVAL_SECONDS = 8;
+    const apiBaseUrl = '';
+    
+    // State Aplikasi
+    let currentAddress = localStorage.getItem('zaymail_address') || '';
+    let currentExpiresAt = parseInt(localStorage.getItem('zaymail_expires_at') || '0', 10);
+    let isCurrentPermanent = localStorage.getItem('zaymail_is_permanent') === 'true' || currentExpiresAt === 0;
+    let audioEnabled = localStorage.getItem('zaymail_audio') !== 'false';
+    
+    let messagesCache = [];
+    let selectedMessageId = null;
+    let pollTimer = null;
+    let countdownRemaining = POLL_INTERVAL_SECONDS;
+    let expiryInterval = null;
+
+    // Riwayat Alamat Tersimpan
+    let savedAddresses = [];
+    try {
+      savedAddresses = JSON.parse(localStorage.getItem('zaymail_saved_addresses') || '[]');
+    } catch(e) {
+      savedAddresses = [];
+    }
+
+    // Mailbox Security Tokens (per-address)
+    let mailboxTokens = {};
+    try {
+      mailboxTokens = JSON.parse(localStorage.getItem('zaymail_tokens') || '{}');
+    } catch(e) {
+      mailboxTokens = {};
+    }
+
+    // App PIN Lock State
+    let appPin = localStorage.getItem('zaymail_pin') || '';
+    let isLocked = !!appPin;
+
+    function getRequestHeaders(address) {
+      const headers = {};
+      const target = (address || currentAddress || '').toLowerCase();
+      if (mailboxTokens[target]) {
+        headers['X-Mailbox-Token'] = mailboxTokens[target];
+      }
+      return headers;
+    }
+
+    // Helper: Simpan alamat ke riwayat
+    function recordAddressHistory(addr, isPermanent = true) {
+      if (!addr) return;
+      const clean = addr.toLowerCase().trim();
+      savedAddresses = savedAddresses.filter(item => (typeof item === 'string' ? item : item.address) !== clean);
+      savedAddresses.unshift({
+        address: clean,
+        isPermanent: isPermanent,
+        lastUsed: Date.now()
+      });
+      if (savedAddresses.length > 20) savedAddresses.pop();
+      localStorage.setItem('zaymail_saved_addresses', JSON.stringify(savedAddresses));
+    }
+
+    // DOM Elements
+    const currentEmailAddressEl = document.getElementById('currentEmailAddress');
+    const expiryBadgeEl = document.getElementById('expiryBadge');
+    const btnTogglePermanentEl = document.getElementById('btnTogglePermanent');
+    const autoRefreshCountdownEl = document.getElementById('autoRefreshCountdown');
+    const pollingProgressBarEl = document.getElementById('pollingProgressBar');
+    const messagesListContainerEl = document.getElementById('messagesListContainer');
+    const emptyInboxStateEl = document.getElementById('emptyInboxState');
+    const inboxCountTextEl = document.getElementById('inboxCountText');
+    const unreadBadgeEl = document.getElementById('unreadBadge');
+    
+    // Viewer Elements
+    const inboxListColumnEl = document.getElementById('inboxListColumn');
+    const messageViewerColumnEl = document.getElementById('messageViewerColumn');
+    const viewerPlaceholderEl = document.getElementById('viewerPlaceholder');
+    const viewerActiveContentEl = document.getElementById('viewerActiveContent');
+    const viewSubjectEl = document.getElementById('viewSubject');
+    const viewSenderNameEl = document.getElementById('viewSenderName');
+    const viewSenderEmailEl = document.getElementById('viewSenderEmail');
+    const viewSenderAvatarEl = document.getElementById('viewSenderAvatar');
+    const viewDateEl = document.getElementById('viewDate');
+    const htmlIframeEl = document.getElementById('htmlIframe');
+    const textContainerEl = document.getElementById('textContainer');
+    const tabHtmlEl = document.getElementById('tabHtml');
+    const tabTextEl = document.getElementById('tabText');
+
+    // Audio Synthesizer (Web Audio API)
+    function playNotificationSound() {
+      if (!audioEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square'; // Neo-brutalist 8-bit sound style
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {
+        console.warn('Audio error:', e);
+      }
+    }
+
+    // Helper: Toast Notification
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      
+      toastMsg.innerText = msg;
+      if (isError) {
+        toast.className = "fixed bottom-5 right-5 z-50 transition-all duration-300 pointer-events-none flex items-center space-x-2 px-4 py-3 bg-neo-rose border-[3px] border-black text-black text-xs sm:text-sm font-bold shadow-brutal-lg";
+        toastIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />`;
+      } else {
+        toast.className = "fixed bottom-5 right-5 z-50 transition-all duration-300 pointer-events-none flex items-center space-x-2 px-4 py-3 bg-neo-lime border-[3px] border-black text-black text-xs sm:text-sm font-bold shadow-brutal-lg";
+        toastIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />`;
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    // API Caller Helper
+    function getApiUrl(endpoint) {
+      const base = apiBaseUrl.trim().replace(/\/+$/, '');
+      return `${base}${endpoint}`;
+    }
+
+    // Format Relative Time
+    function formatTime(unixSec) {
+      if (!unixSec) return '';
+      const now = Math.floor(Date.now() / 1000);
+      const diff = now - unixSec;
+      if (diff < 60) return 'Baru saja';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m lalu`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}j lalu`;
+      return new Date(unixSec * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    }
+
+    // Update Expiry / Permanent Badge
+    function updateExpiryBadge() {
+      if (expiryInterval) clearInterval(expiryInterval);
+      expiryBadgeEl.className = "text-xs font-mono font-bold px-2.5 py-0.5 bg-neo-green border-2 border-black shadow-brutal-sm flex items-center gap-1.5";
+      expiryBadgeEl.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-black"></span>
+        <span>Aktif Permanen</span>
+      `;
+    }
+
+    // Set Active Address
+    function setActiveAddress(addr, expiresAt, isPermanent, token) {
+      currentAddress = addr;
+      currentExpiresAt = expiresAt || 0;
+      isCurrentPermanent = isPermanent || currentExpiresAt === 0;
+
+      if (token) {
+        mailboxTokens[addr.toLowerCase()] = token;
+        localStorage.setItem('zaymail_tokens', JSON.stringify(mailboxTokens));
+      }
+
+      localStorage.setItem('zaymail_address', currentAddress);
+      localStorage.setItem('zaymail_expires_at', currentExpiresAt.toString());
+      localStorage.setItem('zaymail_is_permanent', isCurrentPermanent.toString());
+
+      currentEmailAddressEl.innerText = currentAddress;
+      updateExpiryBadge();
+      recordAddressHistory(currentAddress, isCurrentPermanent);
+
+      messagesCache = [];
+      selectedMessageId = null;
+      renderMessagesList();
+      closeMessageViewer();
+
+      fetchMessages(true);
+    }
+
+    // 1. Buat Alamat Email Baru (Random Nama Indonesia atau Custom)
+    async function requestNewAddress(customAlias = '', makePermanent = true) {
+      currentEmailAddressEl.innerText = 'Menyiapkan alamat...';
+      expiryBadgeEl.innerHTML = 'Memuat...';
+
+      try {
+        let queryParams = [];
+        if (customAlias) queryParams.push(`custom=${encodeURIComponent(customAlias)}`);
+        if (makePermanent) queryParams.push('permanent=true');
+        const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+        const res = await fetch(getApiUrl(`/api/new-address${queryString}`));
+        const data = await res.json();
+
+        if (!data.success) {
+          showToast(data.error || 'Gagal membuat alamat email.', true);
+          currentEmailAddressEl.innerText = currentAddress || 'Gagal';
+          updateExpiryBadge();
+          return;
+        }
+
+        setActiveAddress(data.address, data.expires_at, data.is_permanent, data.token);
+        showToast('Alamat baru siap digunakan!');
+
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Gagal terhubung ke API backend.', true);
+        currentEmailAddressEl.innerText = currentAddress || 'Koneksi error';
+        updateExpiryBadge();
+      }
+    }
+
+    // 2. Buka / Pindah ke Alamat Lama (Switch Mailbox)
+    async function switchOrCreateAddress(target) {
+      if (!target) return;
+      currentEmailAddressEl.innerText = 'Membuka mailbox...';
+      try {
+        const res = await fetch(getApiUrl(`/api/open-address?address=${encodeURIComponent(target)}`), {
+          headers: getRequestHeaders(target)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setActiveAddress(data.address, data.expires_at, data.is_permanent, data.token);
+          showToast(`Mailbox ${data.address} dibuka!`);
+        } else {
+          showToast(data.error || 'Gagal membuka alamat.', true);
+        }
+      } catch (err) {
+        showToast('Koneksi backend bermasalah', true);
+      }
+    }
+
+    // 3. Toggle Status Permanen Alamat
+    async function toggleCurrentPermanent() {
+      if (!currentAddress) return;
+      const targetState = !isCurrentPermanent;
+      try {
+        const res = await fetch(getApiUrl(`/api/toggle-permanent?address=${encodeURIComponent(currentAddress)}&permanent=${targetState}`), { 
+          method: 'POST',
+          headers: getRequestHeaders(currentAddress)
+        });
+        const data = await res.json();
+        if (data.success) {
+          isCurrentPermanent = data.is_permanent;
+          currentExpiresAt = data.expires_at;
+          localStorage.setItem('zaymail_expires_at', currentExpiresAt.toString());
+          localStorage.setItem('zaymail_is_permanent', isCurrentPermanent.toString());
+          updateExpiryBadge();
+          recordAddressHistory(currentAddress, isCurrentPermanent);
+          showToast('Status alamat diperbarui!');
+        }
+      } catch (e) {
+        showToast('Gagal mengubah status', true);
+      }
+    }
+
+    // 4. Fetch Messages (Inbox Polling)
+    async function fetchMessages(isManual = false) {
+      if (!currentAddress) return;
+
+      const refreshIcon = document.getElementById('iconRefreshSpinner');
+      if (isManual) refreshIcon.classList.add('rotate-180');
+
+      try {
+        const res = await fetch(getApiUrl(`/api/messages?address=${encodeURIComponent(currentAddress)}`), {
+          headers: getRequestHeaders(currentAddress)
+        });
+        const data = await res.json();
+
+        if (isManual) setTimeout(() => refreshIcon.classList.remove('rotate-180'), 500);
+
+        if (data.success) {
+          const prevLength = messagesCache.length;
+          const newMessages = data.messages || [];
+
+          if (newMessages.length > prevLength && prevLength !== 0) {
+            playNotificationSound();
+            showToast('Email baru telah masuk!');
+
+            // Browser Desktop Notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+              const latest = newMessages[0];
+              new Notification((latest.subject || 'Email Baru Masuk'), {
+                body: `Dari: ${latest.from_name || latest.from_email}\n${latest.snippet || ''}`
+              });
+            }
+          }
+
+          messagesCache = newMessages;
+          renderMessagesList();
+
+          inboxCountTextEl.innerText = `${messagesCache.length} pesan`;
+          const unreadCount = messagesCache.filter(m => m.is_read === 0).length;
+          if (unreadCount > 0) {
+            unreadBadgeEl.innerText = unreadCount;
+            unreadBadgeEl.classList.remove('hidden');
+          } else {
+            unreadBadgeEl.classList.add('hidden');
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal memperbarui inbox:', err);
+      }
+    }
+
+    // 5. Render Daftar Email di Kolom Kiri
+    function renderMessagesList(filterText = '') {
+      const filtered = messagesCache.filter(m => {
+        const q = filterText.toLowerCase();
+        return (m.from_name && m.from_name.toLowerCase().includes(q)) ||
+               (m.from_email && m.from_email.toLowerCase().includes(q)) ||
+               (m.subject && m.subject.toLowerCase().includes(q));
+      });
+
+      if (filtered.length === 0) {
+        emptyInboxStateEl.classList.remove('hidden');
+        const items = messagesListContainerEl.querySelectorAll('.email-item');
+        items.forEach(el => el.remove());
+        return;
+      }
+
+      emptyInboxStateEl.classList.add('hidden');
+      const items = messagesListContainerEl.querySelectorAll('.email-item');
+      items.forEach(el => el.remove());
+
+      filtered.forEach(msg => {
+        const item = document.createElement('div');
+        const isSelected = selectedMessageId === msg.id;
+        item.className = `email-item p-3.5 cursor-pointer transition-all border-b-2 border-black ${isSelected ? 'bg-neo-yellow' : 'hover:bg-yellow-50'}`;
+        
+        const isUnread = msg.is_read === 0;
+        const sender = msg.from_name || msg.from_email.split('@')[0];
+        const timeAgo = formatTime(msg.received_at);
+
+        item.innerHTML = `
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <div class="flex items-center space-x-1.5 truncate">
+              ${isUnread ? '<span class="w-2.5 h-2.5 bg-black border border-black shrink-0"></span>' : ''}
+              <span class="text-xs font-black uppercase text-black truncate ${isUnread ? 'underline' : ''}">${escapeHtml(sender)}</span>
+            </div>
+            <span class="text-[10px] text-black font-mono font-bold bg-white px-1.5 border border-black shrink-0">${timeAgo}</span>
+          </div>
+          <div class="text-xs font-bold text-black truncate mb-1">
+            ${escapeHtml(msg.subject || '(Tanpa Subjek)')}
+          </div>
+          <div class="text-[11px] text-slate-700 font-mono truncate">
+            ${escapeHtml(msg.snippet || 'Tidak ada pratinjau teks')}
+          </div>
+        `;
+
+        item.addEventListener('click', () => openMessage(msg.id));
+        messagesListContainerEl.appendChild(item);
+      });
+    }
+
+    // 6. Buka & Tampilkan Detail Email (GET /api/message/:id)
+    async function openMessage(msgId) {
+      selectedMessageId = msgId;
+      renderMessagesList(document.getElementById('searchInput').value);
+
+      if (window.innerWidth < 1024) {
+        inboxListColumnEl.classList.add('hidden');
+        messageViewerColumnEl.classList.remove('hidden');
+        messageViewerColumnEl.classList.add('flex');
+        window.scrollTo({ top: messageViewerColumnEl.offsetTop - 70, behavior: 'smooth' });
+      }
+
+      viewerPlaceholderEl.classList.add('hidden');
+      viewerActiveContentEl.classList.remove('hidden');
+
+      viewSubjectEl.innerText = 'Memuat isi pesan...';
+      htmlIframeEl.srcdoc = '<p style="font-family: monospace; color: #000; padding: 20px; font-weight: bold;">Memuat konten email...</p>';
+
+      try {
+        const res = await fetch(getApiUrl(`/api/message/${msgId}`), {
+          headers: getRequestHeaders(currentAddress)
+        });
+        const data = await res.json();
+
+        if (!data.success || !data.message) {
+          showToast('Gagal memuat detail email.', true);
+          return;
+        }
+
+        const msg = data.message;
+        viewSubjectEl.innerText = msg.subject || '(Tanpa Subjek)';
+        viewSenderNameEl.innerText = msg.from_name || msg.from_email.split('@')[0];
+        viewSenderEmailEl.innerText = msg.from_email;
+        viewSenderAvatarEl.innerText = (msg.from_name || msg.from_email)[0].toUpperCase();
+        viewDateEl.innerText = new Date(msg.received_at * 1000).toLocaleString('id-ID', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+
+        const safeHtml = msg.body_html || `<pre style="font-family: monospace; white-space: pre-wrap; padding: 16px; font-weight: bold;">${escapeHtml(msg.body_text || '(Pesan kosong)')}</pre>`;
+        htmlIframeEl.srcdoc = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <base target="_blank">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 16px; line-height: 1.5; color: #000; background: #fff; }
+              img { max-width: 100% !important; height: auto !important; }
+              a { color: #000; font-weight: bold; text-decoration: underline; }
+              pre, code { white-space: pre-wrap; word-break: break-word; font-family: monospace; }
+            </style>
+          </head>
+          <body>${safeHtml}</body>
+          </html>
+        `;
+
+        textContainerEl.innerText = msg.body_text || '(Tidak ada body teks plain)';
+        switchTab('html');
+
+        const cached = messagesCache.find(m => m.id === msgId);
+        if (cached) cached.is_read = 1;
+        renderMessagesList(document.getElementById('searchInput').value);
+
+      } catch (err) {
+        console.error('Error open message:', err);
+        showToast('Gagal mengambil isi email', true);
+      }
+    }
+
+    function switchTab(mode) {
+      if (mode === 'html') {
+        tabHtmlEl.className = 'px-3 py-1 font-extrabold text-xs uppercase bg-neo-yellow border border-black shadow-brutal-sm';
+        tabTextEl.className = 'px-3 py-1 font-bold text-xs uppercase text-slate-600 hover:text-black';
+        htmlIframeEl.classList.remove('hidden');
+        textContainerEl.classList.add('hidden');
+      } else {
+        tabTextEl.className = 'px-3 py-1 font-extrabold text-xs uppercase bg-neo-yellow border border-black shadow-brutal-sm';
+        tabHtmlEl.className = 'px-3 py-1 font-bold text-xs uppercase text-slate-600 hover:text-black';
+        textContainerEl.classList.remove('hidden');
+        htmlIframeEl.classList.add('hidden');
+      }
+    }
+
+    function closeMessageViewer() {
+      selectedMessageId = null;
+      viewerPlaceholderEl.classList.remove('hidden');
+      viewerActiveContentEl.classList.add('hidden');
+      if (window.innerWidth < 1024) {
+        messageViewerColumnEl.classList.add('hidden');
+        messageViewerColumnEl.classList.remove('flex');
+        inboxListColumnEl.classList.remove('hidden');
+        window.scrollTo({ top: inboxListColumnEl.offsetTop - 70, behavior: 'smooth' });
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        inboxListColumnEl.classList.remove('hidden');
+        messageViewerColumnEl.classList.remove('hidden');
+        messageViewerColumnEl.classList.add('flex');
+      } else {
+        if (!selectedMessageId) {
+          messageViewerColumnEl.classList.add('hidden');
+          messageViewerColumnEl.classList.remove('flex');
+          inboxListColumnEl.classList.remove('hidden');
+        } else {
+          inboxListColumnEl.classList.add('hidden');
+          messageViewerColumnEl.classList.remove('hidden');
+          messageViewerColumnEl.classList.add('flex');
+        }
+      }
+    });
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+
+    // 7. Polling Loop
+    function startPollingLoop() {
+      if (pollTimer) clearInterval(pollTimer);
+      countdownRemaining = POLL_INTERVAL_SECONDS;
+
+      pollTimer = setInterval(() => {
+        countdownRemaining--;
+        if (countdownRemaining <= 0) {
+          countdownRemaining = POLL_INTERVAL_SECONDS;
+          fetchMessages();
+        }
+        autoRefreshCountdownEl.innerText = `${countdownRemaining}s`;
+        const percentage = (countdownRemaining / POLL_INTERVAL_SECONDS) * 100;
+        pollingProgressBarEl.style.width = `${percentage}%`;
+      }, 1000);
+    }
+
+    // Render Saved Addresses Modal List
+    function renderSavedAddressesModal() {
+      const container = document.getElementById('savedAddressesList');
+      container.innerHTML = '';
+
+      if (savedAddresses.length === 0) {
+        container.innerHTML = `<p class="text-xs font-mono text-slate-500 italic p-2">Belum ada riwayat alamat di browser ini.</p>`;
+        return;
+      }
+
+      savedAddresses.forEach(item => {
+        const addr = typeof item === 'string' ? item : item.address;
+        const isCurrent = addr.toLowerCase() === currentAddress.toLowerCase();
+
+        const row = document.createElement('div');
+        row.className = `p-3 border-2 border-black flex items-center justify-between gap-2 transition-all ${isCurrent ? 'bg-neo-yellow shadow-brutal-sm' : 'bg-white hover:bg-yellow-50'}`;
+
+        row.innerHTML = `
+          <div class="flex items-center space-x-2 truncate">
+            <span class="text-xs font-mono font-bold text-black truncate">${escapeHtml(addr)}</span>
+            <span class="px-1.5 py-0.2 text-[10px] font-black uppercase bg-neo-lime border border-black">Permanen</span>
+          </div>
+          <button class="btn-select-addr btn-brutal px-3 py-1 bg-white border-2 border-black text-black text-xs font-black uppercase shadow-brutal-sm shrink-0">
+            ${isCurrent ? 'Aktif' : 'Buka'}
+          </button>
+        `;
+
+        row.querySelector('.btn-select-addr').addEventListener('click', () => {
+          modalSaved.classList.add('hidden');
+          modalSaved.classList.remove('flex');
+          if (!isCurrent) {
+            switchOrCreateAddress(addr);
+          }
+        });
+
+        container.appendChild(row);
+      });
+    }
+
+    // App PIN & Screen Lock Logic
+    function checkAppLock() {
+      const lockOverlay = document.getElementById('screenLockOverlay');
+      if (isLocked) {
+        lockOverlay.classList.remove('hidden');
+        lockOverlay.classList.add('flex');
+        document.getElementById('inputUnlockPin').focus();
+      } else {
+        lockOverlay.classList.add('hidden');
+        lockOverlay.classList.remove('flex');
+      }
+    }
+
+    function unlockApp() {
+      const input = document.getElementById('inputUnlockPin').value.trim();
+      if (input === appPin) {
+        isLocked = false;
+        checkAppLock();
+        showToast('Kunci berhasil dibuka!');
+      } else {
+        showToast('PIN salah! Silakan coba lagi.', true);
+        document.getElementById('inputUnlockPin').value = '';
+      }
+    }
+
+    function updatePinUi() {
+      const pinLabel = document.getElementById('pinStatusLabel');
+      const btnRemovePin = document.getElementById('btnRemovePin');
+      if (appPin) {
+        pinLabel.innerText = "AKTIF";
+        pinLabel.className = "text-[10px] text-black font-black bg-neo-lime px-1.5 border border-black";
+        btnRemovePin.classList.remove('hidden');
+      } else {
+        pinLabel.innerText = "Belum Aktif";
+        pinLabel.className = "text-[10px] text-slate-500 font-bold";
+        btnRemovePin.classList.add('hidden');
+      }
+    }
+
+    // ================= EVENT LISTENERS =================
+
+    // Copy to clipboard
+    async function copyEmail() {
+      if (!currentAddress) return;
+      try {
+        await navigator.clipboard.writeText(currentAddress);
+        showToast('Alamat email berhasil disalin!');
+      } catch (e) {
+        const input = document.createElement('input');
+        input.value = currentAddress;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Alamat email berhasil disalin!');
+      }
+    }
+
+    document.getElementById('emailDisplayContainer').addEventListener('click', copyEmail);
+    document.getElementById('btnCopyEmail').addEventListener('click', copyEmail);
+    if (btnTogglePermanentEl) btnTogglePermanentEl.addEventListener('click', toggleCurrentPermanent);
+
+    // Generate New Email
+    document.getElementById('btnNewEmail').addEventListener('click', () => {
+      requestNewAddress('', true);
+    });
+
+    // Refresh Inbox
+    document.getElementById('btnRefreshInbox').addEventListener('click', () => {
+      fetchMessages(true);
+      countdownRemaining = POLL_INTERVAL_SECONDS;
+    });
+
+    // Custom Alias Modal
+    const modalCustom = document.getElementById('modalCustomAlias');
+    const inputCustomAlias = document.getElementById('inputCustomAlias');
+    const checkCustomPermanent = document.getElementById('checkCustomPermanent');
+
+    document.getElementById('btnCustomAlias').addEventListener('click', () => {
+      inputCustomAlias.value = '';
+      checkCustomPermanent.checked = true;
+      modalCustom.classList.remove('hidden');
+      modalCustom.classList.add('flex');
+      inputCustomAlias.focus();
+    });
+    document.getElementById('btnCancelCustomModal').addEventListener('click', () => {
+      modalCustom.classList.add('hidden');
+      modalCustom.classList.remove('flex');
+    });
+    document.getElementById('btnSaveCustomModal').addEventListener('click', () => {
+      const alias = inputCustomAlias.value.trim();
+      if (!alias) return;
+      modalCustom.classList.add('hidden');
+      modalCustom.classList.remove('flex');
+      requestNewAddress(alias, checkCustomPermanent.checked);
+    });
+
+    // Saved Addresses Modal
+    const modalSaved = document.getElementById('modalSavedAddresses');
+    document.getElementById('btnOpenMailboxModal').addEventListener('click', () => {
+      renderSavedAddressesModal();
+      document.getElementById('inputQuickOpen').value = '';
+      modalSaved.classList.remove('hidden');
+      modalSaved.classList.add('flex');
+    });
+    document.getElementById('btnCloseSavedModal').addEventListener('click', () => {
+      modalSaved.classList.add('hidden');
+      modalSaved.classList.remove('flex');
+    });
+    document.getElementById('btnQuickOpenSubmit').addEventListener('click', () => {
+      const target = document.getElementById('inputQuickOpen').value.trim();
+      if (!target) return;
+      modalSaved.classList.add('hidden');
+      modalSaved.classList.remove('flex');
+      switchOrCreateAddress(target);
+    });
+
+    // Settings & Privacy Modal
+    const modalSettings = document.getElementById('modalSettings');
+    document.getElementById('btnSettings').addEventListener('click', () => {
+      updatePinUi();
+      modalSettings.classList.remove('hidden');
+      modalSettings.classList.add('flex');
+    });
+    const closeSettingsModal = () => {
+      modalSettings.classList.add('hidden');
+      modalSettings.classList.remove('flex');
+    };
+    document.getElementById('btnCancelSettingsModal').addEventListener('click', closeSettingsModal);
+    const btnCloseSettingsModalEl = document.getElementById('btnCloseSettingsModal');
+    if (btnCloseSettingsModalEl) btnCloseSettingsModalEl.addEventListener('click', closeSettingsModal);
+
+    // PIN Handlers
+    document.getElementById('btnSubmitUnlock').addEventListener('click', unlockApp);
+    document.getElementById('inputUnlockPin').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') unlockApp();
+    });
+
+    document.getElementById('btnSetPin').addEventListener('click', () => {
+      const newPin = document.getElementById('inputAppPin').value.trim();
+      if (!newPin || newPin.length < 4) {
+        showToast('PIN minimal 4 digit.', true);
+        return;
+      }
+      appPin = newPin;
+      localStorage.setItem('zaymail_pin', appPin);
+      document.getElementById('inputAppPin').value = '';
+      updatePinUi();
+      showToast('PIN pengunci layar berhasil diaktifkan!');
+    });
+
+    document.getElementById('btnRemovePin').addEventListener('click', () => {
+      appPin = '';
+      localStorage.removeItem('zaymail_pin');
+      updatePinUi();
+      showToast('PIN pengunci layar telah dinonaktifkan.');
+    });
+
+    // Delete Current Address
+    document.getElementById('btnDeleteEmail').addEventListener('click', async () => {
+      if (!confirm(`Hapus alamat ${currentAddress} dan seluruh riwayat pesannya sekarang?`)) return;
+      try {
+        await fetch(getApiUrl(`/api/address?address=${encodeURIComponent(currentAddress)}`), { 
+          method: 'DELETE',
+          headers: getRequestHeaders(currentAddress)
+        });
+        savedAddresses = savedAddresses.filter(i => (typeof i === 'string' ? i : i.address) !== currentAddress);
+        localStorage.setItem('zaymail_saved_addresses', JSON.stringify(savedAddresses));
+        delete mailboxTokens[currentAddress.toLowerCase()];
+        localStorage.setItem('zaymail_tokens', JSON.stringify(mailboxTokens));
+        localStorage.removeItem('zaymail_address');
+        localStorage.removeItem('zaymail_expires_at');
+        currentAddress = '';
+        showToast('Alamat berhasil dihapus.');
+        requestNewAddress('', true);
+      } catch (e) {
+        showToast('Gagal menghapus alamat.', true);
+      }
+    });
+
+    // Delete Single Message
+    document.getElementById('btnDeleteCurrentMsg').addEventListener('click', async () => {
+      if (!selectedMessageId) return;
+      if (!confirm('Hapus pesan ini?')) return;
+      try {
+        await fetch(getApiUrl(`/api/message/${selectedMessageId}`), { 
+          method: 'DELETE',
+          headers: getRequestHeaders(currentAddress)
+        });
+        messagesCache = messagesCache.filter(m => m.id !== selectedMessageId);
+        renderMessagesList(document.getElementById('searchInput').value);
+        closeMessageViewer();
+        showToast('Pesan dihapus.');
+      } catch (e) {
+        showToast('Gagal menghapus pesan.', true);
+      }
+    });
+
+    // Mobile Back to List
+    document.getElementById('btnBackToList').addEventListener('click', closeMessageViewer);
+
+    // Switch Body Tabs
+    tabHtmlEl.addEventListener('click', () => switchTab('html'));
+    tabTextEl.addEventListener('click', () => switchTab('text'));
+
+    // Search filter with URL autofill guard
+    const searchInputEl = document.getElementById('searchInput');
+    searchInputEl.addEventListener('input', (e) => {
+      if (e.target.value.includes('://')) {
+        e.target.value = '';
+        renderMessagesList('');
+        return;
+      }
+      renderMessagesList(e.target.value);
+    });
+
+    // Audio Toggle
+    const btnAudioToggle = document.getElementById('btnAudioToggle');
+    const iconAudioOn = document.getElementById('iconAudioOn');
+    const iconAudioOff = document.getElementById('iconAudioOff');
+    btnAudioToggle.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      localStorage.setItem('zaymail_audio', audioEnabled.toString());
+      if (audioEnabled) {
+        iconAudioOn.classList.remove('hidden');
+        iconAudioOff.classList.add('hidden');
+        playNotificationSound();
+        showToast('Suara notifikasi diaktifkan');
+      } else {
+        iconAudioOn.classList.add('hidden');
+        iconAudioOff.classList.remove('hidden');
+        showToast('Suara notifikasi dinonaktifkan');
+      }
+    });
+
+    // ================= EVENT LISTENERS UNTUK PROFIL & AKSES PEMILIK =================
+    // Modal Otorisasi Pemilik
+    const modalOwnerAuth = document.getElementById('modalOwnerAuth');
+    const inputOwnerPin = document.getElementById('inputOwnerPin');
+
+    function openOwnerUnlockModal() {
+      if (!modalOwnerAuth) return;
+      if (inputOwnerPin) inputOwnerPin.value = '';
+      modalOwnerAuth.classList.remove('hidden');
+      modalOwnerAuth.classList.add('flex');
+      if (inputOwnerPin) inputOwnerPin.focus();
+    }
+
+    function closeOwnerUnlockModal() {
+      if (!modalOwnerAuth) return;
+      modalOwnerAuth.classList.add('hidden');
+      modalOwnerAuth.classList.remove('flex');
+    }
+
+    function submitOwnerAuth() {
+      const pin = inputOwnerPin ? inputOwnerPin.value.trim() : '';
+      const validPin = appPin || OWNER_DEFAULT_PIN;
+      if (pin === validPin || pin === OWNER_DEFAULT_PIN) {
+        setDeviceAuthorized(true);
+        closeOwnerUnlockModal();
+        showToast('Perangkat berhasil diotorisasi sebagai Pemilik!');
+        switchToMailView();
+      } else {
+        showToast('PIN Pemilik salah! Coba lagi.', true);
+        if (inputOwnerPin) inputOwnerPin.value = '';
+      }
+    }
+
+    // Deteksi Triple-Tap pada Avatar Profil Publik (Easter Egg Pemilik)
+    let avatarTapCount = 0;
+    let avatarTapTimer = null;
+    const publicAvatarWrapper = document.getElementById('publicAvatarWrapper');
+    if (publicAvatarWrapper) {
+      publicAvatarWrapper.addEventListener('click', () => {
+        avatarTapCount++;
+        if (avatarTapCount === 1) {
+          avatarTapTimer = setTimeout(() => {
+            avatarTapCount = 0;
+          }, 1500);
+        } else if (avatarTapCount >= 3) {
+          clearTimeout(avatarTapTimer);
+          avatarTapCount = 0;
+          openOwnerUnlockModal();
+        }
+      });
+    }
+
+    // Tombol Rahasia di Footer Profil
+    const btnFooterSecretUnlock = document.getElementById('btnFooterSecretUnlock');
+    if (btnFooterSecretUnlock) {
+      btnFooterSecretUnlock.addEventListener('click', openOwnerUnlockModal);
+    }
+
+    // Modal Otorisasi Pemilik Tombol
+    document.getElementById('btnCancelOwnerAuth')?.addEventListener('click', closeOwnerUnlockModal);
+    document.getElementById('btnSubmitOwnerAuth')?.addEventListener('click', submitOwnerAuth);
+    inputOwnerPin?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitOwnerAuth();
+    });
+
+    // Salin Email di Profil Publik
+    document.getElementById('btnPublicCopyEmail')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('halo@zaysee.my.id');
+        showToast('Alamat email disalin: halo@zaysee.my.id');
+      } catch (e) {
+        showToast('halo@zaysee.my.id');
+      }
+    });
+
+    // Tombol di Header Webmail untuk kembali lihat mode publik
+    document.getElementById('btnViewPublicProfile')?.addEventListener('click', () => {
+      switchToPublicProfileView(true);
+    });
+
+    // Tombol di Banner Pratinjau Pemilik
+    document.getElementById('btnBannerReturnMail')?.addEventListener('click', () => {
+      switchToMailView();
+    });
+    document.getElementById('btnBannerRevoke')?.addEventListener('click', revokeDeviceAuth);
+
+    // Tombol Cabut Otorisasi di Modal Pengaturan
+    document.getElementById('btnRevokeDeviceAuth')?.addEventListener('click', revokeDeviceAuth);
+
+    // Akses Rahasia Pemilik: Klik 3x Logo ZayMail di Navbar
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+    const publicBrandLogo = document.getElementById('publicBrandLogo');
+    if (publicBrandLogo) {
+      publicBrandLogo.addEventListener('click', () => {
+        logoTapCount++;
+        clearTimeout(logoTapTimer);
+        logoTapTimer = setTimeout(() => {
+          logoTapCount = 0;
+        }, 1200);
+        if (logoTapCount >= 3) {
+          clearTimeout(logoTapTimer);
+          logoTapCount = 0;
+          openOwnerUnlockModal();
+        }
+      });
+    }
+
+    // Akses Rahasia Pemilik: Shortcut Keyboard Ctrl + Shift + Z atau Ctrl + Shift + M
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'Z' || e.key === 'z' || e.key === 'M' || e.key === 'm')) {
+        e.preventDefault();
+        openOwnerUnlockModal();
+      }
+    });
+
+    // ================= CODE TABS INTEGRATION =================
+    function switchCodeTab(tab) {
+      const blocks = {
+        python: document.getElementById('codeBlockPython'),
+        node: document.getElementById('codeBlockNode'),
+        curl: document.getElementById('codeBlockCurl'),
+      };
+      const btns = {
+        python: document.getElementById('btnTabPython'),
+        node: document.getElementById('btnTabNode'),
+        curl: document.getElementById('btnTabCurl'),
+      };
+
+      ['python', 'node', 'curl'].forEach(t => {
+        if (blocks[t]) {
+          if (t === tab) {
+            blocks[t].classList.remove('hidden');
+          } else {
+            blocks[t].classList.add('hidden');
+          }
+        }
+        if (btns[t]) {
+          if (t === tab) {
+            btns[t].className = 'px-2.5 py-1 bg-neo-yellow text-black font-black uppercase text-[11px] border border-black';
+          } else {
+            btns[t].className = 'px-2.5 py-1 bg-neutral-800 text-neutral-300 font-bold uppercase text-[11px] hover:bg-neutral-700';
+          }
+        }
+      });
+    }
+    window.switchCodeTab = switchCodeTab;
+
+    // ================= API SIMULATOR =================
+    function simulateApiCall(type) {
+      const screen = document.getElementById('apiSimulatorScreen');
+      if (!screen) return;
+
+      if (type === 'clear') {
+        screen.innerText = '// Klik tombol di atas untuk menjalankan simulasi request API...';
+        return;
+      }
+
+      screen.innerText = '// Mengirim request ke Cloudflare Edge (https://zaysee.my.id)...\n// Status: Resolving TLS Handshake...';
+
+      setTimeout(() => {
+        if (type === 'new-address') {
+          const rand = Math.random().toString(36).substring(2, 7);
+          const mockToken = 'zm_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+          const res = {
+            status: 200,
+            success: true,
+            data: {
+              address: `client_${rand}@zaysee.my.id`,
+              token: mockToken,
+              domain: "zaysee.my.id",
+              created_at: new Date().toISOString(),
+              expires_in_hours: 24,
+              quota_remaining: 4999,
+              latency_ms: 27
+            },
+            message: "Alamat email ZayMail aktif dan siap menerima pesan & OTP verifikasi."
+          };
+          screen.innerText = JSON.stringify(res, null, 2);
+        } else if (type === 'messages') {
+          const otp = Math.floor(100000 + Math.random() * 900000);
+          const res = {
+            status: 200,
+            success: true,
+            address: "client_demo@zaysee.my.id",
+            count: 1,
+            messages: [
+              {
+                id: "msg_edge_" + Date.now().toString(36),
+                from: "security@services.com",
+                subject: `Kode Verifikasi Keamanan Akun Anda adalah ${otp}`,
+                otp_code: `${otp}`,
+                snippet: `Halo, gunakan kode verifikasi ${otp} untuk melanjutkan registrasi akun. Kode berlaku 10 menit.`,
+                received_at: new Date().toLocaleTimeString('id-ID'),
+                is_read: false
+              }
+            ],
+            latency_ms: 31
+          };
+          screen.innerText = JSON.stringify(res, null, 2);
+        }
+      }, 300);
+    }
+    window.simulateApiCall = simulateApiCall;
+
+    // ================= SMOOTH SCROLL TANPA HASH DI URL =================
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      // Hapus hash dari URL address bar agar selalu bersih (tanpa #dokumentasi, #fitur, dll)
+      if (window.location.hash) {
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+    }
+    window.scrollToSection = scrollToSection;
+
+    // Bersihkan hash dari URL secara proaktif saat halaman dimuat atau hash berubah
+    function cleanUrlHash() {
+      if (window.location.hash && !window.location.hash.toLowerCase().includes('mail')) {
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+    }
+    cleanUrlHash();
+    window.addEventListener('hashchange', cleanUrlHash);
+
+    // ================= INITIAL LOAD & AUTH CHECK =================
+    function initMailApp() {
+      if (mailAppInitialized) return;
+      mailAppInitialized = true;
+
+      checkAppLock();
+
+      if (!audioEnabled) {
+        iconAudioOn.classList.add('hidden');
+        iconAudioOff.classList.remove('hidden');
+      }
+
+      if (currentAddress) {
+        currentEmailAddressEl.innerText = currentAddress;
+        updateExpiryBadge();
+        fetchMessages(true);
+      } else {
+        requestNewAddress('', true);
+      }
+
+      // Request browser notification permission jika didukung
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+
+      startPollingLoop();
+    }
+
+    function clearSearchBox() {
+      const searchBox = document.getElementById('searchInput');
+      if (searchBox && searchBox.value.includes('://')) {
+        searchBox.value = '';
+        renderMessagesList('');
+      }
+    }
+    window.addEventListener('pageshow', clearSearchBox);
+    
+    // Auto-wipe if Chrome Password Manager injects credential late
+    const guardInterval = setInterval(clearSearchBox, 80);
+    setTimeout(() => clearInterval(guardInterval), 6000);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Purge any legacy storage keys
+      try { 
+        localStorage.removeItem('zaymail_api_base'); 
+        localStorage.removeItem('zaymail_stealth_mode');
+      } catch(e) {}
+
+      // Clear any browser-autofilled values in search box repeatedly
+      clearSearchBox();
+      [50, 150, 300, 600, 1000].forEach(delay => {
+        setTimeout(clearSearchBox, delay);
+      });
+
+      // Cek apakah perangkat ini terotorisasi sebagai pemilik
+      if (isDeviceAuthorized()) {
+        switchToMailView();
+      } else {
+        switchToPublicProfileView(false);
+      }
+    });
+  </script>
+</body>
+</html>

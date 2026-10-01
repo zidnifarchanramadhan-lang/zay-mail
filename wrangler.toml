@@ -1,0 +1,22 @@
+name = "zaymail-api"
+main = "src/index.js"
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Static Assets (Workers Sites / Static Assets untuk melayani SPA dari ./public)
+assets = { directory = "./public" }
+
+# Variabel Lingkungan (Environment Variables)
+[vars]
+DOMAIN = "yourdomain.com"
+EXPIRY_HOURS = "24"
+
+# Binding Database Cloudflare D1
+[[d1_databases]]
+binding = "DB"
+database_name = "zaymail_db"
+database_id = "YOUR_CLOUDFLARE_D1_DATABASE_ID"
+
+# Scheduled Cron Trigger untuk Pembersihan Otomatis
+[triggers]
+crons = ["0 * * * *"] # Berjalan setiap 1 jam sekali

@@ -240,7 +240,70 @@ curl -X GET "https://zaysee.my.id/api/messages?address=YOUR_ADDRESS" \
 
 ---
 
-## 📦 Access Plans & Inquiries
+## 🛠️ Self-Hosting & Deployment
+
+You can deploy your own instance of ZayMail onto Cloudflare's free serverless tier (Workers, D1, Email Routing, and Pages).
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+)
+- Cloudflare Account with a registered domain
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (`npm install -g wrangler`)
+
+### Step-by-Step Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/zidnifarchanramadhan-lang/zay-mail.git
+   cd zay-mail
+   npm install
+   ```
+
+2. **Create Cloudflare D1 Database:**
+   ```bash
+   npx wrangler d1 create zaymail_db
+   ```
+   Copy the `database_id` returned by Cloudflare and paste it into `wrangler.toml`:
+   ```toml
+   [[d1_databases]]
+   binding = "DB"
+   database_name = "zaymail_db"
+   database_id = "YOUR_CLOUDFLARE_D1_DATABASE_ID"
+   ```
+
+3. **Initialize the Database Schema:**
+   ```bash
+   # Local database (for testing)
+   npm run d1:init
+
+   # Remote Cloudflare D1 database (production)
+   npm run d1:init:remote
+   ```
+
+4. **Configure Domain & Secrets:**
+   In `wrangler.toml`, update `DOMAIN` to your domain:
+   ```toml
+   [vars]
+   DOMAIN = "yourdomain.com"
+   ```
+   *(Optional)* Set an Admin Key secret:
+   ```bash
+   npx wrangler secret put ADMIN_KEY
+   ```
+
+5. **Deploy Backend Worker & Web App:**
+   ```bash
+   npm run deploy
+   ```
+
+6. **Configure Cloudflare Email Routing:**
+   - Open Cloudflare Dashboard &rarr; Select Domain &rarr; **Email Routing**.
+   - Enable Email Routing and add MX/SPF records automatically.
+   - Under **Routing Rules**, create a Catch-all rule:
+     - Match: **Catch-all (all incoming addresses)**
+     - Action: **Send to Worker**
+     - Destination Worker: **zaymail-api**
+
+---
 
 ZayMail API is available for developers, QA engineers, automation bots, and data scrapers:
 
