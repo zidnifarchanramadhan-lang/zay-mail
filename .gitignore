@@ -1,0 +1,23 @@
+# Private Cloudflare Backend & Database Configurations
+src/
+functions/
+schema.sql
+wrangler.toml
+.wrangler/
+package.json
+package-lock.json
+node_modules/
+
+# Private Webmail Application (Contains Owner Dashboard & Authentication)
+public/
+
+# Environment Variables & Secrets
+.env*
+*.pem
+*.key
+
+# System & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
